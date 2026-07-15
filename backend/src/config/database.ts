@@ -1,11 +1,7 @@
 require("../bootstrap");
 
 module.exports = {
-  define: {
-    charset: "utf8mb4",
-    collate: "utf8mb4_bin"
-  },
-  dialect: process.env.DB_DIALECT || "mysql",
+  dialect: process.env.DB_DIALECT || "postgres",
   timezone: "-03:00",
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,

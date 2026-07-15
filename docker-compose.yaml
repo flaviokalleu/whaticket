@@ -10,21 +10,21 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
     environment:
-      - DB_HOST=mysql
-      - DB_USER=root
-      - DB_PASS=${MYSQL_ROOT_PASSWORD:-strongpassword}
-      - DB_NAME=${MYSQL_DATABASE:-whaticket}
+      - DB_HOST=postgres
+      - DB_DIALECT=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=${POSTGRES_PASSWORD:-strongpassword}
+      - DB_NAME=${POSTGRES_DATABASE:-whaticket}
       - JWT_SECRET=${JWT_SECRET:-3123123213123}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-75756756756}
       - BACKEND_URL=${BACKEND_URL:-http://localhost}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - PROXY_PORT=${PROXY_PORT:-8080}
-      - CHROME_ARGS=--no-sandbox --disable-setuid-sandbox
     ports:
       - ${BACKEND_PORT:-8080}:3000
     volumes:
       - ./backend/public/:/usr/src/app/public/
-      - ./backend/.wwebjs_auth/:/usr/src/app/.wwebjs_auth/
     networks:
       - whaticket
 
@@ -46,17 +46,16 @@ services:
     networks:
       - whaticket
 
-  mysql:
-    image: ${MYSQL_ENGINE:-mariadb}:${MYSQL_VERSION:-10.6}
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin    
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-15}
     volumes:
-      - ./.docker/data/:/var/lib/mysql
+      - ./.docker/data/:/var/lib/postgresql/data
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-whaticket}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-strongpassword}
+      - POSTGRES_DB=${POSTGRES_DATABASE:-whaticket}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-strongpassword}
       - TZ=${TZ:-America/Fortaleza}
     ports:
-      - ${MYSQL_PORT:-3306}:3306
+      - ${POSTGRES_PORT:-5432}:5432
     restart: always
     networks:
       - whaticket
