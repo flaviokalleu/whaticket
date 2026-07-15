@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import AppError from "../errors/AppError";
 
+import User from "../models/User";
 import AuthUserService from "../services/UserServices/AuthUserService";
 import { SendRefreshToken } from "../helpers/SendRefreshToken";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
@@ -45,6 +46,8 @@ export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  await User.increment("tokenVersion", { where: { id: req.user.id } });
+
   res.clearCookie("jrt");
 
   return res.send();

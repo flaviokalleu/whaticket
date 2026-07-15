@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
+import AppError from "../errors/AppError";
+import { logger } from "../utils/logger";
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
 import DeleteWhatsAppService from "../services/WhatsappService/DeleteWhatsAppService";
 import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsService";
@@ -25,6 +27,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   const {
     name,
     status,
@@ -73,6 +79,10 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   const { whatsappId } = req.params;
   const whatsappData = req.body;
 
@@ -101,10 +111,19 @@ export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   const { whatsappId } = req.params;
 
   await DeleteWhatsAppService(whatsappId);
-  whatsappProvider.removeSession(+whatsappId);
+
+  try {
+    whatsappProvider.removeSession(+whatsappId);
+  } catch (err) {
+    logger.error(err, "Failed to remove whatsapp session after DB delete");
+  }
 
   const io = getIO();
   io.emit("whatsapp", {

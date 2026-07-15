@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import openSocket from "../../services/socket-io";
 
@@ -13,45 +13,64 @@ const useAuth = () => {
 	const [isAuth, setIsAuth] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [user, setUser] = useState({});
+	const refreshPromiseRef = useRef(null);
 
-	api.interceptors.request.use(
-		config => {
-			const token = localStorage.getItem("token");
-			if (token) {
-				config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
-				setIsAuth(true);
-			}
-			return config;
-		},
-		error => {
-			Promise.reject(error);
-		}
-	);
-
-	api.interceptors.response.use(
-		response => {
-			return response;
-		},
-		async error => {
-			const originalRequest = error.config;
-			if (error?.response?.status === 403 && !originalRequest._retry) {
-				originalRequest._retry = true;
-
-				const { data } = await api.post("/auth/refresh_token");
-				if (data) {
-					localStorage.setItem("token", JSON.stringify(data.token));
-					api.defaults.headers.Authorization = `Bearer ${data.token}`;
+	useEffect(() => {
+		const requestInterceptorId = api.interceptors.request.use(
+			config => {
+				const token = localStorage.getItem("token");
+				if (token) {
+					config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
+					setIsAuth(true);
 				}
-				return api(originalRequest);
+				return config;
+			},
+			error => {
+				return Promise.reject(error);
 			}
-			if (error?.response?.status === 401) {
-				localStorage.removeItem("token");
-				api.defaults.headers.Authorization = undefined;
-				setIsAuth(false);
+		);
+
+		const responseInterceptorId = api.interceptors.response.use(
+			response => {
+				return response;
+			},
+			async error => {
+				const originalRequest = error.config;
+				if (error?.response?.status === 403 && !originalRequest._retry) {
+					originalRequest._retry = true;
+
+					if (!refreshPromiseRef.current) {
+						refreshPromiseRef.current = api
+							.post("/auth/refresh_token")
+							.then(({ data }) => {
+								if (data) {
+									localStorage.setItem("token", JSON.stringify(data.token));
+									api.defaults.headers.Authorization = `Bearer ${data.token}`;
+								}
+								return data;
+							})
+							.finally(() => {
+								refreshPromiseRef.current = null;
+							});
+					}
+
+					await refreshPromiseRef.current;
+					return api(originalRequest);
+				}
+				if (error?.response?.status === 401) {
+					localStorage.removeItem("token");
+					api.defaults.headers.Authorization = undefined;
+					setIsAuth(false);
+				}
+				return Promise.reject(error);
 			}
-			return Promise.reject(error);
-		}
-	);
+		);
+
+		return () => {
+			api.interceptors.request.eject(requestInterceptorId);
+			api.interceptors.response.eject(responseInterceptorId);
+		};
+	}, []);
 
 	useEffect(() => {
 		const token = localStorage.getItem("token");
@@ -82,7 +101,8 @@ const useAuth = () => {
 		return () => {
 			socket.disconnect();
 		};
-	}, [user]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user.id]);
 
 	const handleLogin = async userData => {
 		setLoading(true);

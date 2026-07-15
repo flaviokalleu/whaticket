@@ -4,55 +4,51 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { green } from "@mui/material/colors";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import ColorPicker from "../ColorPicker";
-import { IconButton, InputAdornment } from "@material-ui/core";
-import { Colorize } from "@material-ui/icons";
+import { IconButton, InputAdornment } from "@mui/material";
+import { Colorize } from "@mui/icons-material";
 
-const useStyles = makeStyles(theme => ({
-	root: {
-		display: "flex",
-		flexWrap: "wrap",
-	},
-	textField: {
-		marginRight: theme.spacing(1),
-		flex: 1,
-	},
+const rootSx = {
+	display: "flex",
+	flexWrap: "wrap",
+};
 
-	btnWrapper: {
-		position: "relative",
-	},
+const textFieldSx = theme => ({
+	marginRight: theme.spacing(1),
+	flex: 1,
+});
 
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
-	formControl: {
-		margin: theme.spacing(1),
-		minWidth: 120,
-	},
-	colorAdorment: {
-		width: 20,
-		height: 20,
-	},
-}));
+const btnWrapperSx = {
+	position: "relative",
+};
+
+const buttonProgressSx = {
+	color: green[500],
+	position: "absolute",
+	top: "50%",
+	left: "50%",
+	marginTop: -12,
+	marginLeft: -12,
+};
+
+const colorAdormentSx = {
+	width: 20,
+	height: 20,
+};
 
 const QueueSchema = Yup.object().shape({
 	name: Yup.string()
@@ -64,8 +60,6 @@ const QueueSchema = Yup.object().shape({
 });
 
 const QueueModal = ({ open, onClose, queueId }) => {
-	const classes = useStyles();
-
 	const initialState = {
 		name: "",
 		color: "",
@@ -118,7 +112,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 	};
 
 	return (
-		<div className={classes.root}>
+		<Box sx={rootSx}>
 			<Dialog open={open} onClose={handleClose} scroll="paper">
 				<DialogTitle>
 					{queueId
@@ -148,7 +142,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									helperText={touched.name && errors.name}
 									variant="outlined"
 									margin="dense"
-									className={classes.textField}
+									sx={textFieldSx}
 								/>
 								<Field
 									as={TextField}
@@ -164,10 +158,12 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									InputProps={{
 										startAdornment: (
 											<InputAdornment position="start">
-												<div
-													style={{ backgroundColor: values.color }}
-													className={classes.colorAdorment}
-												></div>
+												<Box
+													sx={{
+														...colorAdormentSx,
+														backgroundColor: values.color,
+													}}
+												></Box>
 											</InputAdornment>
 										),
 										endAdornment: (
@@ -228,7 +224,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									color="primary"
 									disabled={isSubmitting}
 									variant="contained"
-									className={classes.btnWrapper}
+									sx={btnWrapperSx}
 								>
 									{queueId
 										? `${i18n.t("queueModal.buttons.okEdit")}`
@@ -236,7 +232,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									{isSubmitting && (
 										<CircularProgress
 											size={24}
-											className={classes.buttonProgress}
+											sx={buttonProgressSx}
 										/>
 									)}
 								</Button>
@@ -245,7 +241,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 					)}
 				</Formik>
 			</Dialog>
-		</div>
+		</Box>
 	);
 };
 

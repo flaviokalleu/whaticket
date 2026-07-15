@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
 import openSocket from "../../services/socket-io";
 
-import { makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import Paper from "@material-ui/core/Paper";
+import { styled } from "@mui/material/styles";
+import List from "@mui/material/List";
+import Paper from "@mui/material/Paper";
 
 import TicketListItem from "../TicketListItem";
 import TicketsListSkeleton from "../TicketsListSkeleton";
@@ -12,64 +12,45 @@ import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const useStyles = makeStyles(theme => ({
-	ticketsListWrapper: {
-		position: "relative",
-		display: "flex",
-		height: "100%",
-		flexDirection: "column",
-		overflow: "hidden",
-		borderTopRightRadius: 0,
-		borderBottomRightRadius: 0,
-	},
+const TicketsListWrapper = styled(Paper)({
+	position: "relative",
+	display: "flex",
+	height: "100%",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderTopRightRadius: 0,
+	borderBottomRightRadius: 0,
+});
 
-	ticketsList: {
-		flex: 1,
-		overflowY: "scroll",
-		...theme.scrollbarStyles,
-		borderTop: "2px solid rgba(0, 0, 0, 0.12)",
-	},
-
-	ticketsListHeader: {
-		color: "rgb(67, 83, 105)",
-		zIndex: 2,
-		backgroundColor: "white",
-		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "space-between",
-	},
-
-	ticketsCount: {
-		fontWeight: "normal",
-		color: "rgb(104, 121, 146)",
-		marginLeft: "8px",
-		fontSize: "14px",
-	},
-
-	noTicketsText: {
-		textAlign: "center",
-		color: "rgb(104, 121, 146)",
-		fontSize: "14px",
-		lineHeight: "1.4",
-	},
-
-	noTicketsTitle: {
-		textAlign: "center",
-		fontSize: "16px",
-		fontWeight: "600",
-		margin: "0px",
-	},
-
-	noTicketsDiv: {
-		display: "flex",
-		height: "100px",
-		margin: 40,
-		flexDirection: "column",
-		alignItems: "center",
-		justifyContent: "center",
-	},
+const TicketsListPaper = styled(Paper)(({ theme }) => ({
+	flex: 1,
+	overflowY: "scroll",
+	...theme.scrollbarStyles,
+	borderTop: "2px solid rgba(0, 0, 0, 0.12)",
 }));
+
+const NoTicketsDiv = styled("div")({
+	display: "flex",
+	height: "100px",
+	margin: 40,
+	flexDirection: "column",
+	alignItems: "center",
+	justifyContent: "center",
+});
+
+const NoTicketsTitle = styled("span")({
+	textAlign: "center",
+	fontSize: "16px",
+	fontWeight: "600",
+	margin: "0px",
+});
+
+const NoTicketsText = styled("p")({
+	textAlign: "center",
+	color: "rgb(104, 121, 146)",
+	fontSize: "14px",
+	lineHeight: "1.4",
+});
 
 const reducer = (state, action) => {
 	if (action.type === "LOAD_TICKETS") {
@@ -152,10 +133,9 @@ const reducer = (state, action) => {
 	}
 };
 
-	const TicketsList = (props) => {
-		const { status, searchParam, showAll, selectedQueueIds, updateCount, style } =
-			props;
-	const classes = useStyles();
+const TicketsList = (props) => {
+	const { status, searchParam, showAll, selectedQueueIds, updateCount, style } =
+		props;
 	const [pageNumber, setPageNumber] = useState(1);
 	const [ticketsList, dispatch] = useReducer(reducer, []);
 	const { user } = useContext(AuthContext);
@@ -269,24 +249,23 @@ const reducer = (state, action) => {
 	};
 
 	return (
-    <Paper className={classes.ticketsListWrapper} style={style}>
-			<Paper
+		<TicketsListWrapper style={style}>
+			<TicketsListPaper
 				square
 				name="closed"
 				elevation={0}
-				className={classes.ticketsList}
 				onScroll={handleScroll}
 			>
 				<List style={{ paddingTop: 0 }}>
 					{ticketsList.length === 0 && !loading ? (
-						<div className={classes.noTicketsDiv}>
-							<span className={classes.noTicketsTitle}>
+						<NoTicketsDiv>
+							<NoTicketsTitle>
 								{i18n.t("ticketsList.noTicketsTitle")}
-							</span>
-							<p className={classes.noTicketsText}>
+							</NoTicketsTitle>
+							<NoTicketsText>
 								{i18n.t("ticketsList.noTicketsMessage")}
-							</p>
-						</div>
+							</NoTicketsText>
+						</NoTicketsDiv>
 					) : (
 						<>
 							{ticketsList.map(ticket => (
@@ -296,8 +275,8 @@ const reducer = (state, action) => {
 					)}
 					{loading && <TicketsListSkeleton />}
 				</List>
-			</Paper>
-    </Paper>
+			</TicketsListPaper>
+		</TicketsListWrapper>
 	);
 };
 

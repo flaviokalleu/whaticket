@@ -1,9 +1,10 @@
 import React from "react";
 
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import { Checkbox, ListItemText } from "@material-ui/core";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import Checkbox from "@mui/material/Checkbox";
+import ListItemText from "@mui/material/ListItemText";
 import { i18n } from "../../translate/i18n";
 
 const TicketsQueueSelect = ({

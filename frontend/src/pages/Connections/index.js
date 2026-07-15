@@ -2,8 +2,7 @@ import React, { useState, useCallback, useContext } from "react";
 import { toast } from "react-toastify";
 import { format, parseISO } from "date-fns";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { green } from "@mui/material/colors";
 import {
 	Button,
 	TableBody,
@@ -16,7 +15,7 @@ import {
 	Tooltip,
 	Typography,
 	CircularProgress,
-} from "@material-ui/core";
+} from "@mui/material";
 import {
 	Edit,
 	CheckCircle,
@@ -25,7 +24,7 @@ import {
 	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -41,42 +40,25 @@ import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles(theme => ({
-	mainPaper: {
-		flex: 1,
-		padding: theme.spacing(1),
-		overflowY: "scroll",
-		...theme.scrollbarStyles,
-	},
-	customTableCell: {
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	tooltip: {
-		backgroundColor: "#f5f5f9",
-		color: "rgba(0, 0, 0, 0.87)",
-		fontSize: theme.typography.pxToRem(14),
-		border: "1px solid #dadde9",
-		maxWidth: 450,
-	},
-	tooltipPopper: {
-		textAlign: "center",
-	},
-	buttonProgress: {
-		color: green[500],
-	},
-}));
-
 const CustomToolTip = ({ title, content, children }) => {
-	const classes = useStyles();
-
 	return (
 		<Tooltip
 			arrow
-			classes={{
-				tooltip: classes.tooltip,
-				popper: classes.tooltipPopper,
+			componentsProps={{
+				tooltip: {
+					sx: (theme) => ({
+						backgroundColor: "#f5f5f9",
+						color: "rgba(0, 0, 0, 0.87)",
+						fontSize: theme.typography.pxToRem(14),
+						border: "1px solid #dadde9",
+						maxWidth: 450,
+					}),
+				},
+				popper: {
+					sx: {
+						textAlign: "center",
+					},
+				},
 			}}
 			title={
 				<React.Fragment>
@@ -93,8 +75,6 @@ const CustomToolTip = ({ title, content, children }) => {
 };
 
 const Connections = () => {
-	const classes = useStyles();
-
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -242,7 +222,7 @@ const Connections = () => {
 					</Button>
 				)}
 				{whatsApp.status === "OPENING" && (
-					<Button size="small" variant="outlined" disabled color="default">
+					<Button size="small" variant="outlined" disabled color="inherit">
 						{i18n.t("connections.buttons.connecting")}
 					</Button>
 				)}
@@ -252,7 +232,7 @@ const Connections = () => {
 
 	const renderStatusToolTips = whatsApp => {
 		return (
-			<div className={classes.customTableCell}>
+			<div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
 				{whatsApp.status === "DISCONNECTED" && (
 					<CustomToolTip
 						title={i18n.t("connections.toolTips.disconnected.title")}
@@ -262,7 +242,7 @@ const Connections = () => {
 					</CustomToolTip>
 				)}
 				{whatsApp.status === "OPENING" && (
-					<CircularProgress size={24} className={classes.buttonProgress} />
+					<CircularProgress size={24} sx={{ color: green[500] }} />
 				)}
 				{whatsApp.status === "qrcode" && (
 					<CustomToolTip
@@ -321,7 +301,15 @@ const Connections = () => {
 					</Button>
 				</MainHeaderButtonsWrapper>
 			</MainHeader>
-			<Paper className={classes.mainPaper} variant="outlined">
+			<Paper
+				sx={(theme) => ({
+					flex: 1,
+					padding: theme.spacing(1),
+					overflowY: "scroll",
+					...theme.scrollbarStyles,
+				})}
+				variant="outlined"
+			>
 				<Table size="small">
 					<TableHead>
 						<TableRow>
@@ -365,7 +353,7 @@ const Connections = () => {
 											</TableCell>
 											<TableCell align="center">
 												{whatsApp.isDefault && (
-													<div className={classes.customTableCell}>
+													<div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
 														<CheckCircle style={{ color: green[500] }} />
 													</div>
 												)}

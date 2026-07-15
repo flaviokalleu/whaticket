@@ -3,13 +3,14 @@ import { useHistory } from "react-router-dom";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-import Avatar from "@material-ui/core/Avatar";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
+import Avatar from "@mui/material/Avatar";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-import { Button, Divider, } from "@material-ui/core";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
 
 const VcardPreview = ({ contact, numbers }) => {
     const history = useHistory();
@@ -35,7 +36,6 @@ const VcardPreview = ({ contact, numbers }) => {
                     setContact(data)
 
                 } catch (err) {
-                    console.log(err)
                     toastError(err);
                 }
             };

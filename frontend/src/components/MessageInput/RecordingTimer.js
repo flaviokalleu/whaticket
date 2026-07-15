@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import Box from "@mui/material/Box";
 
-const useStyles = makeStyles(theme => ({
-	timerBox: {
-		display: "flex",
-		marginLeft: 10,
-		marginRight: 10,
-		alignItems: "center",
-	},
-}));
+const timerBoxSx = {
+	display: "flex",
+	marginLeft: 10,
+	marginRight: 10,
+	alignItems: "center",
+};
 
 const RecordingTimer = () => {
-	const classes = useStyles();
 	const initialState = {
 		minutes: 0,
 		seconds: 0,
@@ -39,9 +36,9 @@ const RecordingTimer = () => {
 	};
 
 	return (
-		<div className={classes.timerBox}>
+		<Box sx={timerBoxSx}>
 			<span>{`${addZero(timer.minutes)}:${addZero(timer.seconds)}`}</span>
-		</div>
+		</Box>
 	);
 };
 

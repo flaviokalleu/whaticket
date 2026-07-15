@@ -4,26 +4,25 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import {
-	Button,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	CircularProgress,
-	Select,
-	InputLabel,
-	MenuItem,
-	FormControl,
-	TextField,
-	InputAdornment,
-	IconButton
-  } from '@material-ui/core';
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
 
-import { Visibility, VisibilityOff } from '@material-ui/icons';
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { green } from "@mui/material/colors";
 
 import { i18n } from "../../translate/i18n";
 
@@ -34,35 +33,14 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../Can";
 import useWhatsApps from "../../hooks/useWhatsApps";
 
-const useStyles = makeStyles(theme => ({
-	root: {
-		display: "flex",
-		flexWrap: "wrap",
-	},
-	multFieldLine: {
-		display: "flex",
-		"& > *:not(:last-child)": {
-			marginRight: theme.spacing(1),
-		},
-	},
-
-	btnWrapper: {
-		position: "relative",
-	},
-
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
-	formControl: {
-		margin: theme.spacing(1),
-		minWidth: 120,
-	},
-}));
+const buttonProgressSx = {
+	color: green[500],
+	position: "absolute",
+	top: "50%",
+	left: "50%",
+	marginTop: "-12px",
+	marginLeft: "-12px",
+};
 
 const UserSchema = Yup.object().shape({
 	name: Yup.string()
@@ -74,8 +52,6 @@ const UserSchema = Yup.object().shape({
 });
 
 const UserModal = ({ open, onClose, userId }) => {
-	const classes = useStyles();
-
 	const initialState = {
 		name: "",
 		email: "",
@@ -131,7 +107,7 @@ const UserModal = ({ open, onClose, userId }) => {
 	};
 
 	return (
-		<div className={classes.root}>
+		<Box sx={{ display: "flex", flexWrap: "wrap" }}>
 			<Dialog
 				open={open}
 				onClose={handleClose}
@@ -158,7 +134,14 @@ const UserModal = ({ open, onClose, userId }) => {
 					{({ touched, errors, isSubmitting }) => (
 						<Form>
 							<DialogContent dividers>
-								<div className={classes.multFieldLine}>
+								<Box
+									sx={{
+										display: "flex",
+										"& > *:not(:last-child)": {
+											marginRight: (theme) => theme.spacing(1),
+										},
+									}}
+								>
 									<Field
 										as={TextField}
 										label={i18n.t("userModal.form.name")}
@@ -193,8 +176,15 @@ const UserModal = ({ open, onClose, userId }) => {
 										}}
 										fullWidth
 									/>
-								</div>
-								<div className={classes.multFieldLine}>
+								</Box>
+								<Box
+									sx={{
+										display: "flex",
+										"& > *:not(:last-child)": {
+											marginRight: (theme) => theme.spacing(1),
+										},
+									}}
+								>
 									<Field
 										as={TextField}
 										label={i18n.t("userModal.form.email")}
@@ -207,7 +197,7 @@ const UserModal = ({ open, onClose, userId }) => {
 									/>
 									<FormControl
 										variant="outlined"
-										className={classes.formControl}
+										sx={{ margin: (theme) => theme.spacing(1), minWidth: 120 }}
 										margin="dense"
 									>
 										<Can
@@ -234,7 +224,7 @@ const UserModal = ({ open, onClose, userId }) => {
 											)}
 										/>
 									</FormControl>
-								</div>
+								</Box>
 								<Can
 									role={loggedInUser.profile}
 									perform="user-modal:editQueues"
@@ -249,7 +239,7 @@ const UserModal = ({ open, onClose, userId }) => {
 									role={loggedInUser.profile}
 									perform="user-modal:editQueues"
 									yes={() => (!loading &&
-										<FormControl variant="outlined" margin="dense" className={classes.maxWidth} fullWidth>
+										<FormControl variant="outlined" margin="dense" fullWidth>
 											<InputLabel>{i18n.t("userModal.form.whatsapp")}</InputLabel>
 											<Field
 												as={Select}
@@ -280,16 +270,13 @@ const UserModal = ({ open, onClose, userId }) => {
 									color="primary"
 									disabled={isSubmitting}
 									variant="contained"
-									className={classes.btnWrapper}
+									sx={{ position: "relative" }}
 								>
 									{userId
 										? `${i18n.t("userModal.buttons.okEdit")}`
 										: `${i18n.t("userModal.buttons.okAdd")}`}
 									{isSubmitting && (
-										<CircularProgress
-											size={24}
-											className={classes.buttonProgress}
-										/>
+										<CircularProgress size={24} sx={buttonProgressSx} />
 									)}
 								</Button>
 							</DialogActions>
@@ -297,7 +284,7 @@ const UserModal = ({ open, onClose, userId }) => {
 					)}
 				</Formik>
 			</Dialog>
-		</div>
+		</Box>
 	);
 };
 

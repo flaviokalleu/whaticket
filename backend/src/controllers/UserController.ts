@@ -27,14 +27,15 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { email, password, name, profile, queueIds, whatsappId } = req.body;
+  const { email, password, name, queueIds, whatsappId } = req.body;
+  let { profile } = req.body;
 
-  if (
-    req.url === "/signup" &&
-    (await CheckSettingsHelper("userCreation")) === "disabled"
-  ) {
-    throw new AppError("ERR_USER_CREATION_DISABLED", 403);
-  } else if (req.url !== "/signup" && req.user.profile !== "admin") {
+  if (req.url === "/signup") {
+    if ((await CheckSettingsHelper("userCreation")) === "disabled") {
+      throw new AppError("ERR_USER_CREATION_DISABLED", 403);
+    }
+    profile = "user";
+  } else if (req.user.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
@@ -58,6 +59,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { userId } = req.params;
+
+  if (req.user.profile !== "admin" && +req.user.id !== +userId) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
 
   const user = await ShowUserService(userId);
 

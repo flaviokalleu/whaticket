@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
-import clsx from "clsx";
 import {
-  makeStyles,
+  Box,
   Drawer,
   AppBar,
   Toolbar,
@@ -12,11 +11,12 @@ import {
   IconButton,
   Menu,
   Switch,
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import Brightness4Icon from "@material-ui/icons/Brightness4";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
 
 import MainListItems from "./MainListItems";
 import NotificationsPopOver from "../components/NotificationsPopOver";
@@ -28,52 +28,37 @@ import { useThemeContext } from "../context/DarkMode";
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    height: "100vh",
-    [theme.breakpoints.down("sm")]: {
-      height: "calc(100vh - 56px)",
-    },
+const Root = styled("div")(({ theme }) => ({
+  display: "flex",
+  height: "100vh",
+  [theme.breakpoints.down("sm")]: {
+    height: "calc(100vh - 56px)",
   },
-  toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
-  },
-  toolbarIcon: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    padding: "0 8px",
-    minHeight: "48px",
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    backgroundColor: theme.palette.background.default,
-  },
-  appBarShift: {
+}));
+
+const StyledAppBar = styled(AppBar, {
+  shouldForwardProp: (prop) => prop !== "drawerOpen",
+})(({ theme, drawerOpen }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(["width", "margin"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  backgroundColor: theme.palette.background.default,
+  ...(drawerOpen && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-  },
-  menuButton: {
-    marginRight: 36,
-    color: theme.palette.text.primary,
-  },
-  menuButtonHidden: {
-    display: "none",
-  },
-  title: {
-    flexGrow: 1,
-    color: theme.palette.text.primary,
-  },
-  drawerPaper: {
+  }),
+}));
+
+const StyledDrawer = styled(Drawer, {
+  shouldForwardProp: (prop) => prop !== "drawerOpen",
+})(({ theme, drawerOpen }) => ({
+  "& .MuiDrawer-paper": {
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
@@ -82,52 +67,21 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     backgroundColor: theme.palette.background.paper,
-  },
-  drawerPaperClose: {
-    overflowX: "hidden",
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+    ...(!drawerOpen && {
+      overflowX: "hidden",
+      transition: theme.transitions.create("width", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      width: theme.spacing(7),
+      [theme.breakpoints.up("sm")]: {
+        width: theme.spacing(9),
+      },
     }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up("sm")]: {
-      width: theme.spacing(9),
-    },
-  },
-  appBarSpacer: {
-    minHeight: "48px",
-  },
-  content: {
-    flex: 1,
-    overflow: "auto",
-  },
-  container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
-  },
-  paper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    overflow: "auto",
-    flexDirection: "column",
-  },
-  switch: {
-    transform: "scale(0.8)",
-  },
-  iconButton: {
-    color: theme.palette.text.primary,
-  },
-  themeSwitchContainer: {
-    display: "flex",
-    alignItems: "center",
-  },
-  themeIcon: {
-    color: theme.palette.text.primary,
   },
 }));
 
 const LoggedInLayout = ({ children }) => {
-  const classes = useStyles();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -182,47 +136,43 @@ const LoggedInLayout = ({ children }) => {
   }
 
   return (
-    <div className={classes.root}>
-      <Drawer
-        variant={drawerVariant}
-        className={drawerOpen ? classes.drawerPaper : classes.drawerPaperClose}
-        classes={{
-          paper: clsx(
-            classes.drawerPaper,
-            !drawerOpen && classes.drawerPaperClose
-          ),
-        }}
-        open={drawerOpen}
-      >
-        <div className={classes.toolbarIcon}>
+    <Root>
+      <StyledDrawer variant={drawerVariant} drawerOpen={drawerOpen} open={drawerOpen}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            padding: "0 8px",
+            minHeight: "48px",
+          }}
+        >
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
-        </div>
+        </Box>
         <Divider />
         <List>
           <MainListItems drawerClose={drawerClose} />
         </List>
         <Divider />
-      </Drawer>
+      </StyledDrawer>
       <UserModal
         open={userModalOpen}
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
       />
-      <AppBar
-        position="absolute"
-        className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
-      >
-        <Toolbar variant="dense" className={classes.toolbar}>
+      <StyledAppBar position="absolute" drawerOpen={drawerOpen}>
+        <Toolbar variant="dense" sx={{ paddingRight: "24px" }}>
           <IconButton
             edge="start"
             aria-label="open drawer"
             onClick={() => setDrawerOpen(!drawerOpen)}
-            className={clsx(
-              classes.menuButton,
-              drawerOpen && classes.menuButtonHidden
-            )}
+            sx={{
+              marginRight: "36px",
+              color: (theme) => theme.palette.text.primary,
+              ...(drawerOpen && { display: "none" }),
+            }}
           >
             <MenuIcon />
           </IconButton>
@@ -230,23 +180,23 @@ const LoggedInLayout = ({ children }) => {
             component="h1"
             variant="h6"
             noWrap
-            className={classes.title}
+            sx={{ flexGrow: 1, color: (theme) => theme.palette.text.primary }}
           >
             WhaTicket
           </Typography>
 
-          <div className={classes.themeSwitchContainer}>
-            <Brightness4Icon className={classes.themeIcon} />
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Brightness4Icon sx={{ color: (theme) => theme.palette.text.primary }} />
             <Switch
               checked={darkMode}
               onChange={toggleTheme}
               color="default"
-              className={classes.switch}
+              sx={{ transform: "scale(0.8)" }}
             />
-          </div>
+          </Box>
 
           {user.id && (
-            <NotificationsPopOver className={classes.iconButton} />
+            <NotificationsPopOver sx={{ color: (theme) => theme.palette.text.primary }} />
           )}
 
           <div>
@@ -255,14 +205,13 @@ const LoggedInLayout = ({ children }) => {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
-              className={classes.iconButton}
+              sx={{ color: (theme) => theme.palette.text.primary }}
             >
               <AccountCircle />
             </IconButton>
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "right",
@@ -283,12 +232,12 @@ const LoggedInLayout = ({ children }) => {
             </Menu>
           </div>
         </Toolbar>
-      </AppBar>
-      <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
+      </StyledAppBar>
+      <Box component="main" sx={{ flex: 1, overflow: "auto" }}>
+        <Box sx={{ minHeight: "48px" }} />
         {children ? children : null}
-      </main>
-    </div>
+      </Box>
+    </Root>
   );
 };
 

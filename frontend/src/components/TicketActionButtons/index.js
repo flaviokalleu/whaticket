@@ -1,9 +1,10 @@
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { IconButton } from "@material-ui/core";
-import { MoreVert, Replay } from "@material-ui/icons";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import MoreVert from "@mui/icons-material/MoreVert";
+import Replay from "@mui/icons-material/Replay";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -12,20 +13,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const useStyles = makeStyles(theme => ({
-	actionButtons: {
-		marginRight: 6,
-		flex: "none",
-		alignSelf: "center",
-		marginLeft: "auto",
-		"& > *": {
-			margin: theme.spacing(1),
-		},
-	},
-}));
-
 const TicketActionButtons = ({ ticket }) => {
-	const classes = useStyles();
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
@@ -61,7 +49,15 @@ const TicketActionButtons = ({ ticket }) => {
 	};
 
 	return (
-		<div className={classes.actionButtons}>
+		<Box
+			sx={{
+				marginRight: "6px",
+				flex: "none",
+				alignSelf: "center",
+				marginLeft: "auto",
+				"& > *": { margin: (theme) => theme.spacing(1) },
+			}}
+		>
 			{ticket.status === "closed" && (
 				<ButtonWithSpinner
 					loading={loading}
@@ -113,7 +109,7 @@ const TicketActionButtons = ({ ticket }) => {
 					{i18n.t("messagesList.header.buttons.accept")}
 				</ButtonWithSpinner>
 			)}
-		</div>
+		</Box>
 	);
 };
 

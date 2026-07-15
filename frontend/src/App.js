@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import Routes from "./routes";
 import "react-toastify/dist/ReactToastify.css";
 
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { ptBR } from "@material-ui/core/locale";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ptBR } from "@mui/material/locale";
 
 const App = () => {
   const [locale, setLocale] = useState();

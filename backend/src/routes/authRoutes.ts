@@ -1,15 +1,28 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import * as SessionController from "../controllers/SessionController";
 import * as UserController from "../controllers/UserController";
 import isAuth from "../middleware/isAuth";
 
 const authRoutes = Router();
 
-authRoutes.post("/signup", UserController.store);
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts, please try again later." }
+});
 
-authRoutes.post("/login", SessionController.store);
+authRoutes.post("/signup", authRateLimiter, UserController.store);
 
-authRoutes.post("/refresh_token", SessionController.update);
+authRoutes.post("/login", authRateLimiter, SessionController.store);
+
+authRoutes.post(
+  "/refresh_token",
+  authRateLimiter,
+  SessionController.update
+);
 
 authRoutes.delete("/logout", isAuth, SessionController.remove);
 

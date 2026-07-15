@@ -4,14 +4,13 @@ import { format } from "date-fns";
 import openSocket from "../../services/socket-io";
 import useSound from "use-sound";
 
-import Popover from "@material-ui/core/Popover";
-import IconButton from "@material-ui/core/IconButton";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import { makeStyles } from "@material-ui/core/styles";
-import Badge from "@material-ui/core/Badge";
-import ChatIcon from "@material-ui/icons/Chat";
+import Popover from "@mui/material/Popover";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Badge from "@mui/material/Badge";
+import ChatIcon from "@mui/icons-material/Chat";
 
 import TicketListItem from "../TicketListItem";
 import { i18n } from "../../translate/i18n";
@@ -19,32 +18,27 @@ import useTickets from "../../hooks/useTickets";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const useStyles = makeStyles(theme => ({
-	tabContainer: {
-		overflowY: "auto",
-		maxHeight: 350,
-		...theme.scrollbarStyles,
+const tabContainerSx = theme => ({
+	overflowY: "auto",
+	maxHeight: 350,
+	...theme.scrollbarStyles,
+});
+
+const popoverPaperSx = theme => ({
+	width: "100%",
+	maxWidth: 350,
+	marginLeft: theme.spacing(2),
+	marginRight: theme.spacing(1),
+	[theme.breakpoints.down("sm")]: {
+		maxWidth: 270,
 	},
-	popoverPaper: {
-		width: "100%",
-		maxWidth: 350,
-		marginLeft: theme.spacing(2),
-		marginRight: theme.spacing(1),
-		[theme.breakpoints.down("sm")]: {
-			maxWidth: 270,
-		},
-	},
-	noShadow: {
-		boxShadow: "none !important",
-	},
-	iconButton: {
-		color: theme.palette.text.primary,
-	},
-}));
+});
+
+const iconButtonSx = theme => ({
+	color: theme.palette.text.primary,
+});
 
 const NotificationsPopOver = () => {
-	const classes = useStyles();
-
 	const history = useHistory();
 	const { user } = useContext(AuthContext);
 	const ticketIdUrl = +history.location.pathname.split("/")[2];
@@ -65,7 +59,7 @@ const NotificationsPopOver = () => {
 		soundAlertRef.current = play;
 
 		if (!("Notification" in window)) {
-			console.log("This browser doesn't support notifications");
+			console.warn("This browser doesn't support notifications");
 		} else {
 			Notification.requestPermission();
 		}
@@ -194,7 +188,7 @@ const NotificationsPopOver = () => {
 				onClick={handleClick}
 				ref={anchorEl}
 				aria-label="Open Notifications"
-				className={classes.iconButton}
+				sx={iconButtonSx}
 			>
 				<Badge badgeContent={notifications.length} color="secondary">
 					<ChatIcon />
@@ -212,10 +206,10 @@ const NotificationsPopOver = () => {
 					vertical: "top",
 					horizontal: "right",
 				}}
-				classes={{ paper: classes.popoverPaper }}
+				PaperProps={{ sx: popoverPaperSx }}
 				onClose={handleClickAway}
 			>
-				<List dense className={classes.tabContainer}>
+				<List dense sx={tabContainerSx}>
 					{notifications.length === 0 ? (
 						<ListItem>
 							<ListItemText>{i18n.t("notifications.noTickets")}</ListItemText>

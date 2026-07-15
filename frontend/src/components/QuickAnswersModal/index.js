@@ -5,7 +5,7 @@ import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
 import {
-  makeStyles,
+  Box,
   Button,
   TextField,
   Dialog,
@@ -13,38 +13,38 @@ import {
   DialogContent,
   DialogTitle,
   CircularProgress,
-} from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
+} from "@mui/material";
+import { green } from "@mui/material/colors";
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexWrap: "wrap",
-  },
-  textField: {
-    marginRight: theme.spacing(1),
-    width: "100%",
-  },
+const rootSx = {
+  flexWrap: "wrap",
+};
 
-  btnWrapper: {
-    position: "relative",
-  },
+const textFieldSx = (theme) => ({
+  marginRight: theme.spacing(1),
+  width: "100%",
+});
 
-  buttonProgress: {
-    color: green[500],
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-  textQuickAnswerContainer: {
-    width: "100%",
-  },
-}));
+const btnWrapperSx = {
+  position: "relative",
+};
+
+const buttonProgressSx = {
+  color: green[500],
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  marginTop: -12,
+  marginLeft: -12,
+};
+
+const textQuickAnswerContainerSx = {
+  width: "100%",
+};
 
 const QuickAnswerSchema = Yup.object().shape({
   shortcut: Yup.string()
@@ -64,7 +64,6 @@ const QuickAnswersModal = ({
   initialValues,
   onSave,
 }) => {
-  const classes = useStyles();
   const isMounted = useRef(true);
 
   const initialState = {
@@ -127,7 +126,7 @@ const QuickAnswersModal = ({
   };
 
   return (
-    <div className={classes.root}>
+    <Box sx={rootSx}>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -154,7 +153,7 @@ const QuickAnswersModal = ({
           {({ values, errors, touched, isSubmitting }) => (
             <Form>
               <DialogContent dividers>
-                <div className={classes.textQuickAnswerContainer}>
+                <Box sx={textQuickAnswerContainerSx}>
                   <Field
                     as={TextField}
                     label={i18n.t("quickAnswersModal.form.shortcut")}
@@ -164,11 +163,11 @@ const QuickAnswersModal = ({
                     helperText={touched.shortcut && errors.shortcut}
                     variant="outlined"
                     margin="dense"
-                    className={classes.textField}
+                    sx={textFieldSx}
                     fullWidth
                   />
-                </div>
-                <div className={classes.textQuickAnswerContainer}>
+                </Box>
+                <Box sx={textQuickAnswerContainerSx}>
                   <Field
                     as={TextField}
                     label={i18n.t("quickAnswersModal.form.message")}
@@ -177,12 +176,12 @@ const QuickAnswersModal = ({
                     helperText={touched.message && errors.message}
                     variant="outlined"
                     margin="dense"
-                    className={classes.textField}
+                    sx={textFieldSx}
                     multiline
                     rows={5}
                     fullWidth
                   />
-                </div>
+                </Box>
               </DialogContent>
               <DialogActions>
                 <Button
@@ -198,7 +197,7 @@ const QuickAnswersModal = ({
                   color="primary"
                   disabled={isSubmitting}
                   variant="contained"
-                  className={classes.btnWrapper}
+                  sx={btnWrapperSx}
                 >
                   {quickAnswerId
                     ? `${i18n.t("quickAnswersModal.buttons.okEdit")}`
@@ -206,7 +205,7 @@ const QuickAnswersModal = ({
                   {isSubmitting && (
                     <CircularProgress
                       size={24}
-                      className={classes.buttonProgress}
+                      sx={buttonProgressSx}
                     />
                   )}
                 </Button>
@@ -215,7 +214,7 @@ const QuickAnswersModal = ({
           )}
         </Formik>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

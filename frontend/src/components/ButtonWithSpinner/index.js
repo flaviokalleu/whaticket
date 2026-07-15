@@ -1,32 +1,24 @@
 import React from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import { CircularProgress, Button } from "@material-ui/core";
-
-const useStyles = makeStyles(theme => ({
-	button: {
-		position: "relative",
-	},
-
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
-}));
+import { green } from "@mui/material/colors";
+import { CircularProgress, Button } from "@mui/material";
 
 const ButtonWithSpinner = ({ loading, children, ...rest }) => {
-	const classes = useStyles();
-
 	return (
-		<Button className={classes.button} disabled={loading} {...rest}>
+		<Button sx={{ position: "relative" }} disabled={loading} {...rest}>
 			{children}
 			{loading && (
-				<CircularProgress size={24} className={classes.buttonProgress} />
+				<CircularProgress
+					size={24}
+					sx={{
+						color: green[500],
+						position: "absolute",
+						top: "50%",
+						left: "50%",
+						marginTop: "-12px",
+						marginLeft: "-12px",
+					}}
+				/>
 			)}
 		</Button>
 	);

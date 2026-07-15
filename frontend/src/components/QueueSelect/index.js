@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import Chip from "@material-ui/core/Chip";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
+import Box from "@mui/material/Box";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles(theme => ({
-	chips: {
-		display: "flex",
-		flexWrap: "wrap",
-	},
-	chip: {
-		margin: 2,
-	},
-}));
+const chipsSx = {
+	display: "flex",
+	flexWrap: "wrap",
+};
+
+const chipSx = {
+	margin: "2px",
+};
 
 const QueueSelect = ({ selectedQueueIds, onChange }) => {
-	const classes = useStyles();
 	const [queues, setQueues] = useState([]);
 
 	useEffect(() => {
@@ -59,7 +57,7 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 						getContentAnchorEl: null,
 					}}
 					renderValue={selected => (
-						<div className={classes.chips}>
+						<Box sx={chipsSx}>
 							{selected?.length > 0 &&
 								selected.map(id => {
 									const queue = queues.find(q => q.id === id);
@@ -69,11 +67,11 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 											style={{ backgroundColor: queue.color }}
 											variant="outlined"
 											label={queue.name}
-											className={classes.chip}
+											sx={chipSx}
 										/>
 									) : null;
 								})}
-						</div>
+						</Box>
 					)}
 				>
 					{queues.map(queue => (

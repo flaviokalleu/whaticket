@@ -3,52 +3,32 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { green } from "@mui/material/colors";
 
-import {
-	Dialog,
-	DialogContent,
-	DialogTitle,
-	Button,
-	DialogActions,
-	CircularProgress,
-	TextField,
-	Switch,
-	FormControlLabel,
-} from "@material-ui/core";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Button from "@mui/material/Button";
+import DialogActions from "@mui/material/DialogActions";
+import CircularProgress from "@mui/material/CircularProgress";
+import TextField from "@mui/material/TextField";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Box from "@mui/material/Box";
 
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 
-const useStyles = makeStyles(theme => ({
-	root: {
-		display: "flex",
-		flexWrap: "wrap",
-	},
-
-	multFieldLine: {
-		display: "flex",
-		"& > *:not(:last-child)": {
-			marginRight: theme.spacing(1),
-		},
-	},
-
-	btnWrapper: {
-		position: "relative",
-	},
-
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
-}));
+const buttonProgressSx = {
+	color: green[500],
+	position: "absolute",
+	top: "50%",
+	left: "50%",
+	marginTop: "-12px",
+	marginLeft: "-12px",
+};
 
 const SessionSchema = Yup.object().shape({
 	name: Yup.string()
@@ -58,7 +38,6 @@ const SessionSchema = Yup.object().shape({
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
-	const classes = useStyles();
 	const initialState = {
 		name: "",
 		greetingMessage: "",
@@ -107,7 +86,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	};
 
 	return (
-		<div className={classes.root}>
+		<Box sx={{ display: "flex", flexWrap: "wrap" }}>
 			<Dialog
 				open={open}
 				onClose={handleClose}
@@ -134,7 +113,14 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 					{({ values, touched, errors, isSubmitting }) => (
 						<Form>
 							<DialogContent dividers>
-								<div className={classes.multFieldLine}>
+								<Box
+									sx={{
+										display: "flex",
+										"& > *:not(:last-child)": {
+											marginRight: (theme) => theme.spacing(1),
+										},
+									}}
+								>
 									<Field
 										as={TextField}
 										label={i18n.t("whatsappModal.form.name")}
@@ -144,7 +130,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										helperText={touched.name && errors.name}
 										variant="outlined"
 										margin="dense"
-										className={classes.textField}
 									/>
 									<FormControlLabel
 										control={
@@ -157,7 +142,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										}
 										label={i18n.t("whatsappModal.form.default")}
 									/>
-								</div>
+								</Box>
 								<div>
 									<Field
 										as={TextField}
@@ -215,16 +200,13 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 									color="primary"
 									disabled={isSubmitting}
 									variant="contained"
-									className={classes.btnWrapper}
+									sx={{ position: "relative" }}
 								>
 									{whatsAppId
 										? i18n.t("whatsappModal.buttons.okEdit")
 										: i18n.t("whatsappModal.buttons.okAdd")}
 									{isSubmitting && (
-										<CircularProgress
-											size={24}
-											className={classes.buttonProgress}
-										/>
+										<CircularProgress size={24} sx={buttonProgressSx} />
 									)}
 								</Button>
 							</DialogActions>
@@ -232,7 +214,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 					)}
 				</Formik>
 			</Dialog>
-		</div>
+		</Box>
 	);
 };
 

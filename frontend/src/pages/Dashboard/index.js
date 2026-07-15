@@ -1,10 +1,9 @@
 import React, { useContext } from "react"
 
-import Paper from "@material-ui/core/Paper"
-import Container from "@material-ui/core/Container"
-import Grid from "@material-ui/core/Grid"
-import { makeStyles } from "@material-ui/core/styles"
-import Typography from "@material-ui/core/Typography";
+import Paper from "@mui/material/Paper"
+import Container from "@mui/material/Container"
+import Grid from "@mui/material/Grid"
+import Typography from "@mui/material/Typography";
 
 import useTickets from "../../hooks/useTickets"
 
@@ -14,37 +13,7 @@ import { i18n } from "../../translate/i18n";
 
 import Chart from "./Chart"
 
-const useStyles = makeStyles(theme => ({
-	container: {
-		paddingTop: theme.spacing(4),
-		paddingBottom: theme.spacing(4),
-	},
-	fixedHeightPaper: {
-		padding: theme.spacing(2),
-		display: "flex",
-		overflow: "auto",
-		flexDirection: "column",
-		height: 240,
-	},
-	customFixedHeightPaper: {
-		padding: theme.spacing(2),
-		display: "flex",
-		overflow: "auto",
-		flexDirection: "column",
-		height: 120,
-	},
-	customFixedHeightPaperLg: {
-		padding: theme.spacing(2),
-		display: "flex",
-		overflow: "auto",
-		flexDirection: "column",
-		height: "100%",
-	},
-}))
-
 const Dashboard = () => {
-	const classes = useStyles()
-
 	const { user } = useContext(AuthContext);
 	var userQueueIds = [];
 
@@ -65,10 +34,18 @@ const Dashboard = () => {
 
 	return (
 		<div>
-			<Container maxWidth="lg" className={classes.container}>
+			<Container maxWidth="lg" sx={(theme) => ({ paddingTop: theme.spacing(4), paddingBottom: theme.spacing(4) })}>
 				<Grid container spacing={3}>
 					<Grid item xs={4}>
-						<Paper className={classes.customFixedHeightPaper} style={{ overflow: "hidden" }}>
+						<Paper
+							sx={(theme) => ({
+								padding: theme.spacing(2),
+								display: "flex",
+								overflow: "hidden",
+								flexDirection: "column",
+								height: 120,
+							})}
+						>
 							<Typography component="h3" variant="h6" color="primary" paragraph>
 								{i18n.t("dashboard.messages.inAttendance.title")}
 							</Typography>
@@ -80,7 +57,15 @@ const Dashboard = () => {
 						</Paper>
 					</Grid>
 					<Grid item xs={4}>
-						<Paper className={classes.customFixedHeightPaper} style={{ overflow: "hidden" }}>
+						<Paper
+							sx={(theme) => ({
+								padding: theme.spacing(2),
+								display: "flex",
+								overflow: "hidden",
+								flexDirection: "column",
+								height: 120,
+							})}
+						>
 							<Typography component="h3" variant="h6" color="primary" paragraph>
 								{i18n.t("dashboard.messages.waiting.title")}
 							</Typography>
@@ -92,7 +77,15 @@ const Dashboard = () => {
 						</Paper>
 					</Grid>
 					<Grid item xs={4}>
-						<Paper className={classes.customFixedHeightPaper} style={{ overflow: "hidden" }}>
+						<Paper
+							sx={(theme) => ({
+								padding: theme.spacing(2),
+								display: "flex",
+								overflow: "hidden",
+								flexDirection: "column",
+								height: 120,
+							})}
+						>
 							<Typography component="h3" variant="h6" color="primary" paragraph>
 								{i18n.t("dashboard.messages.closed.title")}
 							</Typography>
@@ -104,7 +97,15 @@ const Dashboard = () => {
 						</Paper>
 					</Grid>
 					<Grid item xs={12}>
-						<Paper className={classes.fixedHeightPaper}>
+						<Paper
+							sx={(theme) => ({
+								padding: theme.spacing(2),
+								display: "flex",
+								overflow: "auto",
+								flexDirection: "column",
+								height: 240,
+							})}
+						>
 							<Chart />
 						</Paper>
 					</Grid>

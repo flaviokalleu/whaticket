@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 
+import AppError from "../errors/AppError";
 import CreateTicketService from "../services/TicketServices/CreateTicketService";
 import DeleteTicketService from "../services/TicketServices/DeleteTicketService";
 import ListTicketsService from "../services/TicketServices/ListTicketsService";
@@ -8,7 +9,27 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
+import ShowUserService from "../services/UserServices/ShowUserService";
 import formatBody from "../helpers/Mustache";
+
+const checkTicketAccess = async (
+  req: Request,
+  ticket: { userId: number; queueId: number }
+): Promise<void> => {
+  if (req.user.profile === "admin") return;
+
+  if (ticket.userId === +req.user.id) return;
+
+  if (ticket.queueId) {
+    const requestUser = await ShowUserService(req.user.id);
+    const allowed = requestUser.queues.some(
+      queue => queue.id === ticket.queueId
+    );
+    if (allowed) return;
+  }
+
+  throw new AppError("ERR_NO_PERMISSION", 403);
+};
 
 type IndexQuery = {
   searchParam: string;
@@ -79,6 +100,8 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   const contact = await ShowTicketService(ticketId);
 
+  await checkTicketAccess(req, contact);
+
   return res.status(200).json(contact);
 };
 
@@ -88,6 +111,9 @@ export const update = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
   const ticketData: TicketData = req.body;
+
+  const existingTicket = await ShowTicketService(ticketId);
+  await checkTicketAccess(req, existingTicket);
 
   const { ticket } = await UpdateTicketService({
     ticketData,
@@ -115,6 +141,9 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { ticketId } = req.params;
+
+  const existingTicket = await ShowTicketService(ticketId);
+  await checkTicketAccess(req, existingTicket);
 
   const ticket = await DeleteTicketService(ticketId);
 

@@ -1,42 +1,76 @@
 import React from "react";
-import Skeleton from "@material-ui/lab/Skeleton";
-import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
+import { styled } from "@mui/material/styles";
+import Skeleton from "@mui/material/Skeleton";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 import { i18n } from "../../translate/i18n";
 
-const ContactDrawerSkeleton = ({ classes }) => {
+const Content = styled("div")(({ theme }) => ({
+	display: "flex",
+	backgroundColor: "#eee",
+	flexDirection: "column",
+	padding: "8px 0px 8px 8px",
+	height: "100%",
+	overflowY: "scroll",
+	...theme.scrollbarStyles,
+}));
+
+const ContactHeader = styled(Paper)(() => ({
+	display: "flex",
+	padding: 8,
+	flexDirection: "column",
+	alignItems: "center",
+	justifyContent: "center",
+	"& > *": {
+		margin: 4,
+	},
+}));
+
+const ContactDetails = styled(Paper)(() => ({
+	marginTop: 8,
+	padding: 8,
+	display: "flex",
+	flexDirection: "column",
+}));
+
+const ContactExtraInfo = styled(Paper)(() => ({
+	marginTop: 4,
+	padding: 6,
+}));
+
+const AvatarSkeleton = styled(Skeleton)(() => ({
+	margin: 15,
+	width: 160,
+	height: 160,
+}));
+
+const ContactDrawerSkeleton = () => {
 	return (
-		<div className={classes.content}>
-			<Paper square variant="outlined" className={classes.contactHeader}>
-				<Skeleton
-					animation="wave"
-					variant="circle"
-					width={160}
-					height={160}
-					className={classes.contactAvatar}
-				/>
+		<Content>
+			<ContactHeader square variant="outlined">
+				<AvatarSkeleton animation="wave" variant="circular" width={160} height={160} />
 				<Skeleton animation="wave" height={25} width={90} />
 				<Skeleton animation="wave" height={25} width={80} />
 				<Skeleton animation="wave" height={25} width={80} />
-			</Paper>
-			<Paper square className={classes.contactDetails}>
+			</ContactHeader>
+			<ContactDetails square>
 				<Typography variant="subtitle1">
 					{i18n.t("contactDrawer.extraInfo")}
 				</Typography>
-				<Paper square variant="outlined" className={classes.contactExtraInfo}>
+				<ContactExtraInfo square variant="outlined">
 					<Skeleton animation="wave" height={20} width={60} />
 					<Skeleton animation="wave" height={20} width={160} />
-				</Paper>
-				<Paper square variant="outlined" className={classes.contactExtraInfo}>
+				</ContactExtraInfo>
+				<ContactExtraInfo square variant="outlined">
 					<Skeleton animation="wave" height={20} width={60} />
 					<Skeleton animation="wave" height={20} width={160} />
-				</Paper>
-				<Paper square variant="outlined" className={classes.contactExtraInfo}>
+				</ContactExtraInfo>
+				<ContactExtraInfo square variant="outlined">
 					<Skeleton animation="wave" height={20} width={60} />
 					<Skeleton animation="wave" height={20} width={160} />
-				</Paper>
-			</Paper>
-		</div>
+				</ContactExtraInfo>
+			</ContactDetails>
+		</Content>
 	);
 };
 

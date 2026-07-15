@@ -3,6 +3,7 @@ import { Response as Res } from "express";
 
 import User from "../../models/User";
 import AppError from "../../errors/AppError";
+import { logger } from "../../utils/logger";
 import ShowUserService from "../UserServices/ShowUserService";
 import authConfig from "../../config/auth";
 import {
@@ -41,6 +42,7 @@ export const RefreshTokenService = async (
 
     return { user, newToken, refreshToken };
   } catch (err) {
+    logger.warn(err, "RefreshTokenService: refresh failed");
     res.clearCookie("jrt");
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }

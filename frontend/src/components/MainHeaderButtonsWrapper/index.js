@@ -1,21 +1,21 @@
 import React from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
-
-const useStyles = makeStyles(theme => ({
-	MainHeaderButtonsWrapper: {
-		flex: "none",
-		marginLeft: "auto",
-		"& > *": {
-			margin: theme.spacing(1),
-		},
-	},
-}));
+import Box from "@mui/material/Box";
 
 const MainHeaderButtonsWrapper = ({ children }) => {
-	const classes = useStyles();
-
-	return <div className={classes.MainHeaderButtonsWrapper}>{children}</div>;
+	return (
+		<Box
+			sx={{
+				flex: "none",
+				marginLeft: "auto",
+				"& > *": {
+					margin: (theme) => theme.spacing(1),
+				},
+			}}
+		>
+			{children}
+		</Box>
+	);
 };
 
 export default MainHeaderButtonsWrapper;

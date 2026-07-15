@@ -4,7 +4,6 @@ import openSocket from "../../services/socket-io";
 import {
   Button,
   IconButton,
-  makeStyles,
   Paper,
   Table,
   TableBody,
@@ -13,9 +12,9 @@ import {
   TableRow,
   InputAdornment,
   TextField,
-} from "@material-ui/core";
-import { Edit, DeleteOutline } from "@material-ui/icons";
-import SearchIcon from "@material-ui/icons/Search";
+} from "@mui/material";
+import { Edit, DeleteOutline } from "@mui/icons-material";
+import SearchIcon from "@mui/icons-material/Search";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -74,18 +73,7 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
-}));
-
 const QuickAnswers = () => {
-  const classes = useStyles();
-
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -232,7 +220,12 @@ const QuickAnswers = () => {
         </MainHeaderButtonsWrapper>
       </MainHeader>
       <Paper
-        className={classes.mainPaper}
+        sx={(theme) => ({
+          flex: 1,
+          padding: theme.spacing(1),
+          overflowY: "scroll",
+          ...theme.scrollbarStyles,
+        })}
         variant="outlined"
         onScroll={handleScroll}
       >

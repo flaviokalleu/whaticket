@@ -18,11 +18,11 @@ import {
 	InputAdornment,
 	IconButton,
 	Link
-} from '@material-ui/core';
+} from '@mui/material';
 
-import { LockOutlined, Visibility, VisibilityOff } from '@material-ui/icons';
-
-import { makeStyles } from "@material-ui/core/styles";
+import LockOutlined from '@mui/icons-material/LockOutlined';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 import { i18n } from "../../translate/i18n";
 
@@ -42,26 +42,6 @@ import toastError from "../../errors/toastError";
 // 	);
 // };
 
-const useStyles = makeStyles(theme => ({
-	paper: {
-		marginTop: theme.spacing(8),
-		display: "flex",
-		flexDirection: "column",
-		alignItems: "center",
-	},
-	avatar: {
-		margin: theme.spacing(1),
-		backgroundColor: theme.palette.secondary.main,
-	},
-	form: {
-		width: "100%",
-		marginTop: theme.spacing(3),
-	},
-	submit: {
-		margin: theme.spacing(3, 0, 2),
-	},
-}));
-
 const UserSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2, "Too Short!")
@@ -72,7 +52,6 @@ const UserSchema = Yup.object().shape({
 });
 
 const SignUp = () => {
-	const classes = useStyles();
 	const history = useHistory();
 
 	const initialState = { name: "", email: "", password: "" };
@@ -92,14 +71,20 @@ const SignUp = () => {
 	return (
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
-			<div className={classes.paper}>
-				<Avatar className={classes.avatar}>
+			<Box
+				sx={{
+					marginTop: 8,
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+				}}
+			>
+				<Avatar sx={{ margin: 1, bgcolor: "secondary.main" }}>
 					<LockOutlined />
 				</Avatar>
 				<Typography component="h1" variant="h5">
 					{i18n.t("signup.title")}
 				</Typography>
-				{/* <form className={classes.form} noValidate onSubmit={handleSignUp}> */}
 				<Formik
 					initialValues={user}
 					enableReinitialize={true}
@@ -112,7 +97,7 @@ const SignUp = () => {
 					}}
 				>
 					{({ touched, errors, isSubmitting }) => (
-						<Form className={classes.form}>
+						<Form style={{ width: "100%", marginTop: 24 }}>
 							<Grid container spacing={2}>
 								<Grid item xs={12}>
 									<Field
@@ -174,7 +159,7 @@ const SignUp = () => {
 								fullWidth
 								variant="contained"
 								color="primary"
-								className={classes.submit}
+								sx={{ margin: "24px 0 16px" }}
 							>
 								{i18n.t("signup.buttons.submit")}
 							</Button>
@@ -193,7 +178,7 @@ const SignUp = () => {
 						</Form>
 					)}
 				</Formik>
-			</div>
+			</Box>
 			<Box mt={5}>{/* <Copyright /> */}</Box>
 		</Container>
 	);

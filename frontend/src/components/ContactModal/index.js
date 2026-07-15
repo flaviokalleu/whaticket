@@ -4,52 +4,38 @@ import * as Yup from "yup";
 import { Formik, FieldArray, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { styled } from "@mui/material/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles(theme => ({
-	root: {
-		display: "flex",
-		flexWrap: "wrap",
-	},
-	textField: {
-		marginRight: theme.spacing(1),
-		flex: 1,
-	},
+const Root = styled("div")(() => ({
+	display: "flex",
+	flexWrap: "wrap",
+}));
 
-	extraAttr: {
-		display: "flex",
-		justifyContent: "center",
-		alignItems: "center",
-	},
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	marginRight: theme.spacing(1),
+	flex: 1,
+}));
 
-	btnWrapper: {
-		position: "relative",
-	},
-
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
+const ExtraAttr = styled("div")(() => ({
+	display: "flex",
+	justifyContent: "center",
+	alignItems: "center",
 }));
 
 const ContactSchema = Yup.object().shape({
@@ -62,7 +48,6 @@ const ContactSchema = Yup.object().shape({
 });
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
-	const classes = useStyles();
 	const isMounted = useRef(true);
 
 	const initialState = {
@@ -126,7 +111,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	};
 
 	return (
-		<div className={classes.root}>
+		<Root>
 			<Dialog open={open} onClose={handleClose} maxWidth="lg" scroll="paper">
 				<DialogTitle id="form-dialog-title">
 					{contactId
@@ -151,7 +136,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									{i18n.t("contactModal.form.mainInfo")}
 								</Typography>
 								<Field
-									as={TextField}
+									as={StyledTextField}
 									label={i18n.t("contactModal.form.name")}
 									name="name"
 									autoFocus
@@ -159,7 +144,6 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									helperText={touched.name && errors.name}
 									variant="outlined"
 									margin="dense"
-									className={classes.textField}
 								/>
 								<Field
 									as={TextField}
@@ -197,25 +181,22 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 											{values.extraInfo &&
 												values.extraInfo.length > 0 &&
 												values.extraInfo.map((info, index) => (
-													<div
-														className={classes.extraAttr}
+													<ExtraAttr
 														key={`${index}-info`}
 													>
 														<Field
-															as={TextField}
+															as={StyledTextField}
 															label={i18n.t("contactModal.form.extraName")}
 															name={`extraInfo[${index}].name`}
 															variant="outlined"
 															margin="dense"
-															className={classes.textField}
 														/>
 														<Field
-															as={TextField}
+															as={StyledTextField}
 															label={i18n.t("contactModal.form.extraValue")}
 															name={`extraInfo[${index}].value`}
 															variant="outlined"
 															margin="dense"
-															className={classes.textField}
 														/>
 														<IconButton
 															size="small"
@@ -223,9 +204,9 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 														>
 															<DeleteOutlineIcon />
 														</IconButton>
-													</div>
+													</ExtraAttr>
 												))}
-											<div className={classes.extraAttr}>
+											<ExtraAttr>
 												<Button
 													style={{ flex: 1, marginTop: 8 }}
 													variant="outlined"
@@ -234,7 +215,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												>
 													{`+ ${i18n.t("contactModal.buttons.addExtraInfo")}`}
 												</Button>
-											</div>
+											</ExtraAttr>
 										</>
 									)}
 								</FieldArray>
@@ -253,7 +234,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									color="primary"
 									disabled={isSubmitting}
 									variant="contained"
-									className={classes.btnWrapper}
+									sx={{ position: "relative" }}
 								>
 									{contactId
 										? `${i18n.t("contactModal.buttons.okEdit")}`
@@ -261,7 +242,13 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									{isSubmitting && (
 										<CircularProgress
 											size={24}
-											className={classes.buttonProgress}
+											sx={{
+												position: "absolute",
+												top: "50%",
+												left: "50%",
+												marginTop: "-12px",
+												marginLeft: "-12px",
+											}}
 										/>
 									)}
 								</Button>
@@ -270,7 +257,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 					)}
 				</Formik>
 			</Dialog>
-		</div>
+		</Root>
 	);
 };
 
