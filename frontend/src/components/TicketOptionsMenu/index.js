@@ -1,7 +1,13 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { MoreVertical } from "lucide-react";
 
-import MenuItem from "@mui/material/MenuItem";
-import Menu from "@mui/material/Menu";
+import { Button } from "../ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -11,7 +17,8 @@ import toastError from "../../errors/toastError";
 import { Can } from "../Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
+const TicketOptionsMenu = ({ ticket }) => {
+	const [menuOpen, setMenuOpen] = useState(false);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [transferTicketModalOpen, setTransferTicketModalOpen] = useState(false);
 	const isMounted = useRef(true);
@@ -31,14 +38,9 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 		}
 	};
 
-	const handleOpenConfirmationModal = e => {
-		setConfirmationOpen(true);
-		handleClose();
-	};
-
-	const handleOpenTransferModal = e => {
+	const handleOpenTransferModal = () => {
 		setTransferTicketModalOpen(true);
-		handleClose();
+		setMenuOpen(false);
 	};
 
 	const handleCloseTransferTicketModal = () => {
@@ -49,35 +51,33 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 
 	return (
 		<>
-			<Menu
-				id="menu-appbar"
-				anchorEl={anchorEl}
-				getContentAnchorEl={null}
-				anchorOrigin={{
-					vertical: "bottom",
-					horizontal: "right",
-				}}
-				keepMounted
-				transformOrigin={{
-					vertical: "top",
-					horizontal: "right",
-				}}
-				open={menuOpen}
-				onClose={handleClose}
-			>
-				<MenuItem onClick={handleOpenTransferModal}>
-					{i18n.t("ticketOptionsMenu.transfer")}
-				</MenuItem>
-				<Can
-					role={user.profile}
-					perform="ticket-options:deleteTicket"
-					yes={() => (
-						<MenuItem onClick={handleOpenConfirmationModal}>
-							{i18n.t("ticketOptionsMenu.delete")}
-						</MenuItem>
-					)}
-				/>
-			</Menu>
+			<DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+				<DropdownMenuTrigger asChild>
+					<Button variant="ghost" size="icon">
+						<MoreVertical className="h-4 w-4" />
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end">
+					<DropdownMenuItem onClick={handleOpenTransferModal}>
+						{i18n.t("ticketOptionsMenu.transfer")}
+					</DropdownMenuItem>
+					<Can
+						role={user.profile}
+						perform="ticket-options:deleteTicket"
+						yes={() => (
+							<DropdownMenuItem
+								className="text-destructive focus:text-destructive"
+								onClick={() => {
+									setConfirmationOpen(true);
+									setMenuOpen(false);
+								}}
+							>
+								{i18n.t("ticketOptionsMenu.delete")}
+							</DropdownMenuItem>
+						)}
+					/>
+				</DropdownMenuContent>
+			</DropdownMenu>
 			<ConfirmationModal
 				title={`${i18n.t("ticketOptionsMenu.confirmationModal.title")}${
 					ticket.id

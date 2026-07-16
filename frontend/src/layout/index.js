@@ -1,22 +1,16 @@
 import React, { useState, useContext, useEffect } from "react";
+import { Menu, ChevronLeft, Moon, Sun, MessageSquare, UserCircle } from "lucide-react";
+
+import { Button } from "../components/ui/button";
+import { Sheet, SheetContent } from "../components/ui/sheet";
+import { Switch } from "../components/ui/switch";
 import {
-  Box,
-  Drawer,
-  AppBar,
-  Toolbar,
-  List,
-  Typography,
-  Divider,
-  MenuItem,
-  IconButton,
-  Menu,
-  Switch,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import { cn } from "../lib/utils";
 
 import MainListItems from "./MainListItems";
 import NotificationsPopOver from "../components/NotificationsPopOver";
@@ -26,218 +20,149 @@ import BackdropLoading from "../components/BackdropLoading";
 import { i18n } from "../translate/i18n";
 import { useThemeContext } from "../context/DarkMode";
 
-const drawerWidth = 240;
+const SIDEBAR_WIDTH = 240;
+const SIDEBAR_WIDTH_COLLAPSED = 72;
 
-const Root = styled("div")(({ theme }) => ({
-  display: "flex",
-  height: "100vh",
-  [theme.breakpoints.down("sm")]: {
-    height: "calc(100vh - 56px)",
-  },
-}));
-
-const StyledAppBar = styled(AppBar, {
-  shouldForwardProp: (prop) => prop !== "drawerOpen",
-})(({ theme, drawerOpen }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(["width", "margin"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  backgroundColor: theme.palette.background.default,
-  ...(drawerOpen && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const StyledDrawer = styled(Drawer, {
-  shouldForwardProp: (prop) => prop !== "drawerOpen",
-})(({ theme, drawerOpen }) => ({
-  "& .MuiDrawer-paper": {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    backgroundColor: theme.palette.background.paper,
-    ...(!drawerOpen && {
-      overflowX: "hidden",
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up("sm")]: {
-        width: theme.spacing(9),
-      },
-    }),
-  },
-}));
+function SidebarContent({ collapsed, drawerClose }) {
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex h-14 items-center gap-2 px-4">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <MessageSquare className="h-4 w-4" />
+        </div>
+        {!collapsed && (
+          <span className="truncate text-base font-semibold tracking-tight">
+            WhaTicket
+          </span>
+        )}
+      </div>
+      <div className="flex-1 overflow-y-auto py-2">
+        <MainListItems drawerClose={drawerClose} collapsed={collapsed} />
+      </div>
+    </div>
+  );
+}
 
 const LoggedInLayout = ({ children }) => {
   const [userModalOpen, setUserModalOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { handleLogout, loading } = useContext(AuthContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerVariant, setDrawerVariant] = useState("permanent");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { user } = useContext(AuthContext);
   const { darkMode, toggleTheme } = useThemeContext();
 
   useEffect(() => {
-    if (document.body.offsetWidth > 600) {
-      setDrawerOpen(true);
-    }
+    const checkSize = () => {
+      const mobile = document.body.offsetWidth < 600;
+      setIsMobile(mobile);
+      if (!mobile) setDrawerOpen(true);
+    };
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    return () => window.removeEventListener("resize", checkSize);
   }, []);
 
-  useEffect(() => {
-    if (document.body.offsetWidth < 600) {
-      setDrawerVariant("temporary");
-    } else {
-      setDrawerVariant("permanent");
-    }
-  }, [drawerOpen]);
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-    setMenuOpen(true);
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-    setMenuOpen(false);
+  const drawerClose = () => {
+    if (isMobile) setMobileOpen(false);
   };
 
   const handleOpenUserModal = () => {
     setUserModalOpen(true);
-    handleCloseMenu();
   };
 
   const handleClickLogout = () => {
-    handleCloseMenu();
     handleLogout();
-  };
-
-  const drawerClose = () => {
-    if (document.body.offsetWidth < 600) {
-      setDrawerOpen(false);
-    }
   };
 
   if (loading) {
     return <BackdropLoading />;
   }
 
+  const sidebarWidth = drawerOpen ? SIDEBAR_WIDTH : SIDEBAR_WIDTH_COLLAPSED;
+
   return (
-    <Root>
-      <StyledDrawer variant={drawerVariant} drawerOpen={drawerOpen} open={drawerOpen}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            padding: "0 8px",
-            minHeight: "48px",
-          }}
-        >
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </Box>
-        <Divider />
-        <List>
-          <MainListItems drawerClose={drawerClose} />
-        </List>
-        <Divider />
-      </StyledDrawer>
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "hidden shrink-0 border-r bg-card transition-[width] duration-200 ease-in-out md:block"
+        )}
+        style={{ width: sidebarWidth }}
+      >
+        <SidebarContent collapsed={!drawerOpen} drawerClose={drawerClose} />
+      </aside>
+
+      {/* Mobile sidebar */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <SidebarContent collapsed={false} drawerClose={drawerClose} />
+        </SheetContent>
+      </Sheet>
+
       <UserModal
         open={userModalOpen}
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
       />
-      <StyledAppBar position="absolute" drawerOpen={drawerOpen}>
-        <Toolbar variant="dense" sx={{ paddingRight: "24px" }}>
-          <IconButton
-            edge="start"
-            aria-label="open drawer"
-            onClick={() => setDrawerOpen(!drawerOpen)}
-            sx={{
-              marginRight: "36px",
-              color: (theme) => theme.palette.text.primary,
-              ...(drawerOpen && { display: "none" }),
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            component="h1"
-            variant="h6"
-            noWrap
-            sx={{ flexGrow: 1, color: (theme) => theme.palette.text.primary }}
-          >
-            WhaTicket
-          </Typography>
 
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Brightness4Icon sx={{ color: (theme) => theme.palette.text.primary }} />
-            <Switch
-              checked={darkMode}
-              onChange={toggleTheme}
-              color="default"
-              sx={{ transform: "scale(0.8)" }}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Topbar */}
+        <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden md:inline-flex"
+            onClick={() => setDrawerOpen((prev) => !prev)}
+          >
+            <ChevronLeft
+              className={cn(
+                "h-5 w-5 transition-transform",
+                !drawerOpen && "rotate-180"
+              )}
             />
-          </Box>
+          </Button>
 
-          {user.id && (
-            <NotificationsPopOver sx={{ color: (theme) => theme.palette.text.primary }} />
-          )}
+          <div className="flex-1" />
 
-          <div>
-            <IconButton
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              sx={{ color: (theme) => theme.palette.text.primary }}
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={menuOpen}
-              onClose={handleCloseMenu}
-            >
-              <MenuItem onClick={handleOpenUserModal}>
-                {i18n.t("mainDrawer.appBar.user.profile")}
-              </MenuItem>
-              <MenuItem onClick={handleClickLogout}>
-                {i18n.t("mainDrawer.appBar.user.logout")}
-              </MenuItem>
-            </Menu>
+          <div className="flex items-center gap-1">
+            <Sun className="h-4 w-4 text-muted-foreground" />
+            <Switch checked={darkMode} onCheckedChange={toggleTheme} />
+            <Moon className="h-4 w-4 text-muted-foreground" />
           </div>
-        </Toolbar>
-      </StyledAppBar>
-      <Box component="main" sx={{ flex: 1, overflow: "auto" }}>
-        <Box sx={{ minHeight: "48px" }} />
-        {children ? children : null}
-      </Box>
-    </Root>
+
+          {user.id && <NotificationsPopOver />}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <UserCircle className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleOpenUserModal}>
+                {i18n.t("mainDrawer.appBar.user.profile")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleClickLogout}>
+                {i18n.t("mainDrawer.appBar.user.logout")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </header>
+
+        <main className="flex min-h-0 flex-1 flex-col overflow-auto">
+          {children ? children : null}
+        </main>
+      </div>
+    </div>
   );
 };
 

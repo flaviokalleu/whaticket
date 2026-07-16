@@ -1,12 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-
-const timerBoxSx = {
-	display: "flex",
-	marginLeft: 10,
-	marginRight: 10,
-	alignItems: "center",
-};
 
 const RecordingTimer = () => {
 	const initialState = {
@@ -36,9 +28,10 @@ const RecordingTimer = () => {
 	};
 
 	return (
-		<Box sx={timerBoxSx}>
-			<span>{`${addZero(timer.minutes)}:${addZero(timer.seconds)}`}</span>
-		</Box>
+		<div className="mx-2.5 flex items-center gap-1.5 text-sm font-medium">
+			<span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+			{`${addZero(timer.minutes)}:${addZero(timer.seconds)}`}
+		</div>
 	);
 };
 

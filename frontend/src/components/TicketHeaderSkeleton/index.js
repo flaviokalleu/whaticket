@@ -1,30 +1,16 @@
 import React from "react";
 
-import { Avatar, Card, CardHeader, Skeleton } from "@mui/material";
+import { Skeleton } from "../ui/skeleton";
 
 const TicketHeaderSkeleton = () => {
 	return (
-		<Card
-			square
-			sx={{
-				display: "flex",
-				backgroundColor: "#eee",
-				flex: "none",
-				borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-			}}
-		>
-			<CardHeader
-				titleTypographyProps={{ noWrap: true }}
-				subheaderTypographyProps={{ noWrap: true }}
-				avatar={
-					<Skeleton animation="wave" variant="circular">
-						<Avatar alt="contact_image" />
-					</Skeleton>
-				}
-				title={<Skeleton animation="wave" width={80} />}
-				subheader={<Skeleton animation="wave" width={140} />}
-			/>
-		</Card>
+		<div className="flex flex-none items-center gap-3 border-b bg-muted/40 px-3 py-2">
+			<Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+			<div className="space-y-1.5">
+				<Skeleton className="h-4 w-20" />
+				<Skeleton className="h-3.5 w-32" />
+			</div>
+		</div>
 	);
 };
 

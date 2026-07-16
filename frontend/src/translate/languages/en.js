@@ -285,6 +285,7 @@ const messages = {
           contacts: "Contacts",
           quickAnswers: "Quick Answers",
           queues: "Queues",
+          tags: "Tags",
           administration: "Administration",
           users: "Users",
           settings: "Settings",
@@ -318,6 +319,44 @@ const messages = {
       },
       queueSelect: {
         inputLabel: "Queues",
+      },
+      tags: {
+        title: "Tags",
+        table: {
+          name: "Name",
+          color: "Color",
+          actions: "Actions",
+        },
+        buttons: {
+          add: "Add tag",
+        },
+        toasts: {
+          deleted: "Tag deleted successfully!",
+        },
+        confirmationModal: {
+          deleteTitle: "Delete",
+          deleteMessage:
+            "Are you sure? It cannot be reverted! Tickets with this tag will still exist, but will not have this tag assigned.",
+        },
+      },
+      tagModal: {
+        title: {
+          add: "Add tag",
+          edit: "Edit tag",
+        },
+        form: {
+          name: "Name",
+          color: "Color",
+        },
+        buttons: {
+          okAdd: "Add",
+          okEdit: "Save",
+          cancel: "Cancel",
+        },
+        success: "Tag saved successfully!",
+      },
+      tagSelect: {
+        inputLabel: "Tags",
       },
       quickAnswers: {
         title: "Quick Answers",

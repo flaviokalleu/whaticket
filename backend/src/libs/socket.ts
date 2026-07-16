@@ -4,6 +4,13 @@ import { verify } from "jsonwebtoken";
 import AppError from "../errors/AppError";
 import { logger } from "../utils/logger";
 import authConfig from "../config/auth";
+import Ticket from "../models/Ticket";
+import ShowUserService from "../services/UserServices/ShowUserService";
+
+interface TokenPayload {
+  id: string;
+  profile: string;
+}
 
 let io: SocketIO;
 
@@ -16,18 +23,41 @@ export const initIO = (httpServer: Server): SocketIO => {
 
   io.on("connection", socket => {
     const { token } = socket.handshake.query;
-    let tokenData = null;
+    let decoded: TokenPayload | null = null;
     try {
-      tokenData = verify(token, authConfig.secret);
-      logger.debug(JSON.stringify(tokenData), "io-onConnection: tokenData");
+      decoded = verify(token, authConfig.secret) as TokenPayload;
+      logger.debug(JSON.stringify(decoded), "io-onConnection: tokenData");
     } catch (error) {
       logger.error(JSON.stringify(error), "Error decoding token");
       socket.disconnect();
       return io;
     }
 
+    const tokenData: TokenPayload = decoded;
+
     logger.info("Client Connected");
-    socket.on("joinChatBox", (ticketId: string) => {
+    socket.on("joinChatBox", async (ticketId: string) => {
+      if (tokenData.profile !== "admin") {
+        const ticket = await Ticket.findByPk(ticketId);
+        if (!ticket) return;
+
+        const isOwner = ticket.userId === +tokenData.id;
+        let isInQueue = false;
+        if (!isOwner && ticket.queueId) {
+          const requestUser = await ShowUserService(tokenData.id);
+          isInQueue = requestUser.queues.some(
+            queue => queue.id === ticket.queueId
+          );
+        }
+
+        if (!isOwner && !isInQueue) {
+          logger.warn(
+            `Client ${tokenData.id} denied join to ticket ${ticketId} (no access)`
+          );
+          return;
+        }
+      }
+
       logger.info("A client joined a ticket channel");
       socket.join(ticketId);
     });

@@ -3,40 +3,23 @@ import React, { useState, useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { Formik, FieldArray, Form, Field } from "formik";
 import { toast } from "react-toastify";
+import { Loader2, Trash2, Plus } from "lucide-react";
 
-import { styled } from "@mui/material/styles";
-import { green } from "@mui/material/colors";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import CircularProgress from "@mui/material/CircularProgress";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-
-const Root = styled("div")(() => ({
-	display: "flex",
-	flexWrap: "wrap",
-}));
-
-const StyledTextField = styled(TextField)(({ theme }) => ({
-	marginRight: theme.spacing(1),
-	flex: 1,
-}));
-
-const ExtraAttr = styled("div")(() => ({
-	display: "flex",
-	justifyContent: "center",
-	alignItems: "center",
-}));
 
 const ContactSchema = Yup.object().shape({
 	name: Yup.string()
@@ -111,13 +94,15 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	};
 
 	return (
-		<Root>
-			<Dialog open={open} onClose={handleClose} maxWidth="lg" scroll="paper">
-				<DialogTitle id="form-dialog-title">
-					{contactId
-						? `${i18n.t("contactModal.title.edit")}`
-						: `${i18n.t("contactModal.title.add")}`}
-				</DialogTitle>
+		<Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+			<DialogContent className="sm:max-w-lg">
+				<DialogHeader>
+					<DialogTitle>
+						{contactId
+							? i18n.t("contactModal.title.edit")
+							: i18n.t("contactModal.title.add")}
+					</DialogTitle>
+				</DialogHeader>
 				<Formik
 					initialValues={contact}
 					enableReinitialize={true}
@@ -130,134 +115,102 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 					}}
 				>
 					{({ values, errors, touched, isSubmitting }) => (
-						<Form>
-							<DialogContent dividers>
-								<Typography variant="subtitle1" gutterBottom>
-									{i18n.t("contactModal.form.mainInfo")}
-								</Typography>
-								<Field
-									as={StyledTextField}
-									label={i18n.t("contactModal.form.name")}
-									name="name"
-									autoFocus
-									error={touched.name && Boolean(errors.name)}
-									helperText={touched.name && errors.name}
-									variant="outlined"
-									margin="dense"
-								/>
-								<Field
-									as={TextField}
-									label={i18n.t("contactModal.form.number")}
-									name="number"
-									error={touched.number && Boolean(errors.number)}
-									helperText={touched.number && errors.number}
-									placeholder="5513912344321"
-									variant="outlined"
-									margin="dense"
-								/>
-								<div>
-									<Field
-										as={TextField}
-										label={i18n.t("contactModal.form.email")}
-										name="email"
-										error={touched.email && Boolean(errors.email)}
-										helperText={touched.email && errors.email}
-										placeholder="Email address"
-										fullWidth
-										margin="dense"
-										variant="outlined"
-									/>
-								</div>
-								<Typography
-									style={{ marginBottom: 8, marginTop: 12 }}
-									variant="subtitle1"
-								>
-									{i18n.t("contactModal.form.extraInfo")}
-								</Typography>
+						<Form className="space-y-4">
+							<p className="text-sm font-semibold">
+								{i18n.t("contactModal.form.mainInfo")}
+							</p>
 
-								<FieldArray name="extraInfo">
-									{({ push, remove }) => (
-										<>
-											{values.extraInfo &&
-												values.extraInfo.length > 0 &&
-												values.extraInfo.map((info, index) => (
-													<ExtraAttr
-														key={`${index}-info`}
-													>
-														<Field
-															as={StyledTextField}
-															label={i18n.t("contactModal.form.extraName")}
-															name={`extraInfo[${index}].name`}
-															variant="outlined"
-															margin="dense"
-														/>
-														<Field
-															as={StyledTextField}
-															label={i18n.t("contactModal.form.extraValue")}
-															name={`extraInfo[${index}].value`}
-															variant="outlined"
-															margin="dense"
-														/>
-														<IconButton
-															size="small"
-															onClick={() => remove(index)}
-														>
-															<DeleteOutlineIcon />
-														</IconButton>
-													</ExtraAttr>
-												))}
-											<ExtraAttr>
-												<Button
-													style={{ flex: 1, marginTop: 8 }}
-													variant="outlined"
-													color="primary"
-													onClick={() => push({ name: "", value: "" })}
-												>
-													{`+ ${i18n.t("contactModal.buttons.addExtraInfo")}`}
-												</Button>
-											</ExtraAttr>
-										</>
+							<div className="flex gap-3">
+								<div className="flex-1 space-y-1.5">
+									<Label htmlFor="name">{i18n.t("contactModal.form.name")}</Label>
+									<Field as={Input} id="name" name="name" autoFocus />
+									{touched.name && errors.name && (
+										<p className="text-xs text-destructive">{errors.name}</p>
 									)}
-								</FieldArray>
-							</DialogContent>
-							<DialogActions>
+								</div>
+								<div className="flex-1 space-y-1.5">
+									<Label htmlFor="number">{i18n.t("contactModal.form.number")}</Label>
+									<Field as={Input} id="number" name="number" placeholder="5513912344321" />
+									{touched.number && errors.number && (
+										<p className="text-xs text-destructive">{errors.number}</p>
+									)}
+								</div>
+							</div>
+
+							<div className="space-y-1.5">
+								<Label htmlFor="email">{i18n.t("contactModal.form.email")}</Label>
+								<Field as={Input} id="email" name="email" placeholder="Email address" />
+								{touched.email && errors.email && (
+									<p className="text-xs text-destructive">{errors.email}</p>
+								)}
+							</div>
+
+							<p className="pt-2 text-sm font-semibold">
+								{i18n.t("contactModal.form.extraInfo")}
+							</p>
+
+							<FieldArray name="extraInfo">
+								{({ push, remove }) => (
+									<div className="space-y-2">
+										{values.extraInfo &&
+											values.extraInfo.length > 0 &&
+											values.extraInfo.map((info, index) => (
+												<div key={`${index}-info`} className="flex items-center gap-2">
+													<Field
+														as={Input}
+														placeholder={i18n.t("contactModal.form.extraName")}
+														name={`extraInfo[${index}].name`}
+													/>
+													<Field
+														as={Input}
+														placeholder={i18n.t("contactModal.form.extraValue")}
+														name={`extraInfo[${index}].value`}
+													/>
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														onClick={() => remove(index)}
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												</div>
+											))}
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											className="w-full"
+											onClick={() => push({ name: "", value: "" })}
+										>
+											<Plus className="h-3.5 w-3.5" />
+											{i18n.t("contactModal.buttons.addExtraInfo")}
+										</Button>
+									</div>
+								)}
+							</FieldArray>
+
+							<DialogFooter>
 								<Button
+									type="button"
+									variant="outline"
 									onClick={handleClose}
-									color="secondary"
 									disabled={isSubmitting}
-									variant="outlined"
 								>
 									{i18n.t("contactModal.buttons.cancel")}
 								</Button>
-								<Button
-									type="submit"
-									color="primary"
-									disabled={isSubmitting}
-									variant="contained"
-									sx={{ position: "relative" }}
-								>
+								<Button type="submit" disabled={isSubmitting}>
+									{isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
 									{contactId
-										? `${i18n.t("contactModal.buttons.okEdit")}`
-										: `${i18n.t("contactModal.buttons.okAdd")}`}
-									{isSubmitting && (
-										<CircularProgress
-											size={24}
-											sx={{
-												position: "absolute",
-												top: "50%",
-												left: "50%",
-												marginTop: "-12px",
-												marginLeft: "-12px",
-											}}
-										/>
-									)}
+										? i18n.t("contactModal.buttons.okEdit")
+										: i18n.t("contactModal.buttons.okAdd")}
 								</Button>
-							</DialogActions>
+							</DialogFooter>
 						</Form>
 					)}
 				</Formik>
-			</Dialog>
-		</Root>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

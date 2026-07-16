@@ -1,32 +1,19 @@
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { RotateCcw, Loader2 } from "lucide-react";
 
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import MoreVert from "@mui/icons-material/MoreVert";
-import Replay from "@mui/icons-material/Replay";
+import { Button } from "../ui/button";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import TicketOptionsMenu from "../TicketOptionsMenu";
-import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const TicketActionButtons = ({ ticket }) => {
 	const history = useHistory();
-	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
-	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
-
-	const handleOpenTicketOptionsMenu = e => {
-		setAnchorEl(e.currentTarget);
-	};
-
-	const handleCloseTicketOptionsMenu = e => {
-		setAnchorEl(null);
-	};
 
 	const handleUpdateTicketStatus = async (e, status, userId) => {
 		setLoading(true);
@@ -49,67 +36,51 @@ const TicketActionButtons = ({ ticket }) => {
 	};
 
 	return (
-		<Box
-			sx={{
-				marginRight: "6px",
-				flex: "none",
-				alignSelf: "center",
-				marginLeft: "auto",
-				"& > *": { margin: (theme) => theme.spacing(1) },
-			}}
-		>
+		<div className="ml-auto flex shrink-0 items-center gap-1.5">
 			{ticket.status === "closed" && (
-				<ButtonWithSpinner
-					loading={loading}
-					startIcon={<Replay />}
-					size="small"
-					onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
+				<Button
+					size="sm"
+					variant="outline"
+					disabled={loading}
+					onClick={(e) => handleUpdateTicketStatus(e, "open", user?.id)}
 				>
+					{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
 					{i18n.t("messagesList.header.buttons.reopen")}
-				</ButtonWithSpinner>
+				</Button>
 			)}
 			{ticket.status === "open" && (
 				<>
-					<ButtonWithSpinner
-						loading={loading}
-						startIcon={<Replay />}
-						size="small"
-						onClick={e => handleUpdateTicketStatus(e, "pending", null)}
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={loading}
+						onClick={(e) => handleUpdateTicketStatus(e, "pending", null)}
 					>
+						{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
 						{i18n.t("messagesList.header.buttons.return")}
-					</ButtonWithSpinner>
-					<ButtonWithSpinner
-						loading={loading}
-						size="small"
-						variant="contained"
-						color="primary"
-						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
+					</Button>
+					<Button
+						size="sm"
+						disabled={loading}
+						onClick={(e) => handleUpdateTicketStatus(e, "closed", user?.id)}
 					>
+						{loading && <Loader2 className="h-4 w-4 animate-spin" />}
 						{i18n.t("messagesList.header.buttons.resolve")}
-					</ButtonWithSpinner>
-					<IconButton onClick={handleOpenTicketOptionsMenu}>
-						<MoreVert />
-					</IconButton>
-					<TicketOptionsMenu
-						ticket={ticket}
-						anchorEl={anchorEl}
-						menuOpen={ticketOptionsMenuOpen}
-						handleClose={handleCloseTicketOptionsMenu}
-					/>
+					</Button>
+					<TicketOptionsMenu ticket={ticket} />
 				</>
 			)}
 			{ticket.status === "pending" && (
-				<ButtonWithSpinner
-					loading={loading}
-					size="small"
-					variant="contained"
-					color="primary"
-					onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
+				<Button
+					size="sm"
+					disabled={loading}
+					onClick={(e) => handleUpdateTicketStatus(e, "open", user?.id)}
 				>
+					{loading && <Loader2 className="h-4 w-4 animate-spin" />}
 					{i18n.t("messagesList.header.buttons.accept")}
-				</ButtonWithSpinner>
+				</Button>
 			)}
-		</Box>
+		</div>
 	);
 };
 

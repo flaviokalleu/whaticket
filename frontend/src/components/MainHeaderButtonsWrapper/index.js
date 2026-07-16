@@ -1,20 +1,10 @@
 import React from "react";
 
-import Box from "@mui/material/Box";
-
 const MainHeaderButtonsWrapper = ({ children }) => {
 	return (
-		<Box
-			sx={{
-				flex: "none",
-				marginLeft: "auto",
-				"& > *": {
-					margin: (theme) => theme.spacing(1),
-				},
-			}}
-		>
+		<div className="ml-auto flex shrink-0 items-center gap-2">
 			{children}
-		</Box>
+		</div>
 	);
 };
 

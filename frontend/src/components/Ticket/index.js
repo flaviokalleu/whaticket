@@ -4,9 +4,6 @@ import { useParams, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import openSocket from "../../services/socket-io";
 
-import Paper from "@mui/material/Paper";
-import { styled } from "@mui/material/styles";
-
 import ContactDrawer from "../ContactDrawer";
 import MessageInput from "../MessageInput/";
 import TicketHeader from "../TicketHeader";
@@ -16,62 +13,6 @@ import MessagesList from "../MessagesList";
 import api from "../../services/api";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
-
-const drawerWidth = 320;
-
-const RootDiv = styled("div")({
-  display: "flex",
-  height: "100%",
-  position: "relative",
-  overflow: "hidden",
-});
-
-const TicketInfoDiv = styled("div")(({ theme }) => ({
-  maxWidth: "50%",
-  flexBasis: "50%",
-  [theme.breakpoints.down("sm")]: {
-    maxWidth: "80%",
-    flexBasis: "80%",
-  },
-}));
-
-const TicketActionButtonsDiv = styled("div")(({ theme }) => ({
-  maxWidth: "50%",
-  flexBasis: "50%",
-  display: "flex",
-  [theme.breakpoints.down("sm")]: {
-    maxWidth: "100%",
-    flexBasis: "100%",
-    marginBottom: "5px",
-  },
-}));
-
-const MainWrapper = styled(Paper, {
-  shouldForwardProp: (prop) => prop !== "drawerOpen",
-})(({ theme, drawerOpen }) => ({
-  flex: 1,
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-  borderTopLeftRadius: 0,
-  borderBottomLeftRadius: 0,
-  borderLeft: "0",
-  marginRight: -drawerWidth,
-  transition: theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(drawerOpen && {
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginRight: 0,
-  }),
-}));
 
 const Ticket = () => {
   const { ticketId } = useParams();
@@ -143,19 +84,16 @@ const Ticket = () => {
   };
 
   return (
-    <RootDiv id="drawer-container">
-      <MainWrapper variant="outlined" elevation={0} drawerOpen={drawerOpen}>
+    <div id="drawer-container" className="relative flex h-full w-full overflow-hidden">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden bg-background">
+
         <TicketHeader loading={loading}>
-          <TicketInfoDiv>
-            <TicketInfo
-              contact={contact}
-              ticket={ticket}
-              onClick={handleDrawerOpen}
-            />
-          </TicketInfoDiv>
-          <TicketActionButtonsDiv>
-            <TicketActionButtons ticket={ticket} />
-          </TicketActionButtonsDiv>
+          <TicketInfo
+            contact={contact}
+            ticket={ticket}
+            onClick={handleDrawerOpen}
+          />
+          <TicketActionButtons ticket={ticket} />
         </TicketHeader>
         <ReplyMessageProvider>
           <MessagesList
@@ -164,14 +102,15 @@ const Ticket = () => {
           ></MessagesList>
           <MessageInput ticketStatus={ticket.status} />
         </ReplyMessageProvider>
-      </MainWrapper>
+      </div>
       <ContactDrawer
         open={drawerOpen}
         handleDrawerClose={handleDrawerClose}
         contact={contact}
+        ticket={ticket}
         loading={loading}
       />
-    </RootDiv>
+    </div>
   );
 };
 

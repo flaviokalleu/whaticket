@@ -1,118 +1,96 @@
-import React, { useContext } from "react"
+import React, { useContext } from "react";
+import { MessageCircle, Clock, CheckCircle2 } from "lucide-react";
 
-import Paper from "@mui/material/Paper"
-import Container from "@mui/material/Container"
-import Grid from "@mui/material/Grid"
-import Typography from "@mui/material/Typography";
-
-import useTickets from "../../hooks/useTickets"
+import { Card, CardContent } from "../../components/ui/card";
+import useTickets from "../../hooks/useTickets";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 import { i18n } from "../../translate/i18n";
 
-import Chart from "./Chart"
+import Chart from "./Chart";
+
+const useTicketCount = (status, showAll, withUnreadMessages, queueIds) => {
+	const { count } = useTickets({
+		status,
+		showAll,
+		withUnreadMessages,
+		queueIds: JSON.stringify(queueIds),
+	});
+	return count;
+};
+
+const StatCard = ({ icon: Icon, label, value, tone }) => {
+	const tones = {
+		blue: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+		amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+		emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+	};
+
+	return (
+		<Card className="border-none shadow-sm">
+			<CardContent className="flex items-center gap-4 p-5">
+				<div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tones[tone]}`}>
+					<Icon className="h-5 w-5" />
+				</div>
+				<div className="min-w-0">
+					<p className="truncate text-sm font-medium text-muted-foreground">{label}</p>
+					<p className="text-2xl font-bold tracking-tight">{value}</p>
+				</div>
+			</CardContent>
+		</Card>
+	);
+};
 
 const Dashboard = () => {
 	const { user } = useContext(AuthContext);
-	var userQueueIds = [];
+	let userQueueIds = [];
 
 	if (user.queues && user.queues.length > 0) {
-		userQueueIds = user.queues.map(q => q.id);
+		userQueueIds = user.queues.map((q) => q.id);
 	}
 
-	const GetTickets = (status, showAll, withUnreadMessages) => {
-
-		const { count } = useTickets({
-			status: status,
-			showAll: showAll,
-			withUnreadMessages: withUnreadMessages,
-			queueIds: JSON.stringify(userQueueIds)
-		});
-		return count;
-	}
+	const inAttendance = useTicketCount("open", "true", "false", userQueueIds);
+	const waiting = useTicketCount("pending", "true", "false", userQueueIds);
+	const closed = useTicketCount("closed", "true", "false", userQueueIds);
 
 	return (
-		<div>
-			<Container maxWidth="lg" sx={(theme) => ({ paddingTop: theme.spacing(4), paddingBottom: theme.spacing(4) })}>
-				<Grid container spacing={3}>
-					<Grid item xs={4}>
-						<Paper
-							sx={(theme) => ({
-								padding: theme.spacing(2),
-								display: "flex",
-								overflow: "hidden",
-								flexDirection: "column",
-								height: 120,
-							})}
-						>
-							<Typography component="h3" variant="h6" color="primary" paragraph>
-								{i18n.t("dashboard.messages.inAttendance.title")}
-							</Typography>
-							<Grid item>
-								<Typography component="h1" variant="h4">
-									{GetTickets("open", "true", "false")}
-								</Typography>
-							</Grid>
-						</Paper>
-					</Grid>
-					<Grid item xs={4}>
-						<Paper
-							sx={(theme) => ({
-								padding: theme.spacing(2),
-								display: "flex",
-								overflow: "hidden",
-								flexDirection: "column",
-								height: 120,
-							})}
-						>
-							<Typography component="h3" variant="h6" color="primary" paragraph>
-								{i18n.t("dashboard.messages.waiting.title")}
-							</Typography>
-							<Grid item>
-								<Typography component="h1" variant="h4">
-									{GetTickets("pending", "true", "false")}
-								</Typography>
-							</Grid>
-						</Paper>
-					</Grid>
-					<Grid item xs={4}>
-						<Paper
-							sx={(theme) => ({
-								padding: theme.spacing(2),
-								display: "flex",
-								overflow: "hidden",
-								flexDirection: "column",
-								height: 120,
-							})}
-						>
-							<Typography component="h3" variant="h6" color="primary" paragraph>
-								{i18n.t("dashboard.messages.closed.title")}
-							</Typography>
-							<Grid item>
-								<Typography component="h1" variant="h4">
-									{GetTickets("closed", "true", "false")}
-								</Typography>
-							</Grid>
-						</Paper>
-					</Grid>
-					<Grid item xs={12}>
-						<Paper
-							sx={(theme) => ({
-								padding: theme.spacing(2),
-								display: "flex",
-								overflow: "auto",
-								flexDirection: "column",
-								height: 240,
-							})}
-						>
-							<Chart />
-						</Paper>
-					</Grid>
-				</Grid>
-			</Container>
-		</div>
-	)
-}
+		<div className="mx-auto w-full max-w-6xl px-6 py-8">
+			<div className="mb-6">
+				<h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+				<p className="text-sm text-muted-foreground">
+					Visão geral do atendimento em tempo real.
+				</p>
+			</div>
 
-export default Dashboard
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+				<StatCard
+					icon={MessageCircle}
+					label={i18n.t("dashboard.messages.inAttendance.title")}
+					value={inAttendance}
+					tone="blue"
+				/>
+				<StatCard
+					icon={Clock}
+					label={i18n.t("dashboard.messages.waiting.title")}
+					value={waiting}
+					tone="amber"
+				/>
+				<StatCard
+					icon={CheckCircle2}
+					label={i18n.t("dashboard.messages.closed.title")}
+					value={closed}
+					tone="emerald"
+				/>
+			</div>
+
+			<Card className="mt-4 border-none shadow-sm">
+				<CardContent className="p-5">
+					<Chart />
+				</CardContent>
+			</Card>
+		</div>
+	);
+};
+
+export default Dashboard;

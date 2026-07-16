@@ -289,6 +289,7 @@ const messages = {
           contacts: "Contactos",
           quickAnswers: "Respuestas rápidas",
           queues: "Linhas",
+          tags: "Etiquetas",
           administration: "Administración",
           users: "Usuarios",
           settings: "Configuración",
@@ -322,6 +323,44 @@ const messages = {
       },
       queueSelect: {
         inputLabel: "Linhas",
+      },
+      tags: {
+        title: "Etiquetas",
+        table: {
+          name: "Nombre",
+          color: "Color",
+          actions: "Comportamiento",
+        },
+        buttons: {
+          add: "Agregar etiqueta",
+        },
+        toasts: {
+          deleted: "¡Etiqueta eliminada con éxito!",
+        },
+        confirmationModal: {
+          deleteTitle: "Eliminar",
+          deleteMessage:
+            "¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets con esa etiqueta seguirán existiendo, pero ya no tendrán esa etiqueta asignada.",
+        },
+      },
+      tagModal: {
+        title: {
+          add: "Agregar etiqueta",
+          edit: "Editar etiqueta",
+        },
+        form: {
+          name: "Nombre",
+          color: "Color",
+        },
+        buttons: {
+          okAdd: "Agregar",
+          okEdit: "Guardar",
+          cancel: "Cancelar",
+        },
+        success: "¡Etiqueta guardada con éxito!",
+      },
+      tagSelect: {
+        inputLabel: "Etiquetas",
       },
       quickAnswers: {
         title: "Respuestas rápidas",

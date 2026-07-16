@@ -1,11 +1,8 @@
 import React from "react";
-import Typography from "@mui/material/Typography";
 
-const Title = props => {
+const Title = ({ children }) => {
 	return (
-		<Typography component="h2" variant="h6" color="primary" gutterBottom>
-			{props.children}
-		</Typography>
+		<h2 className="text-sm font-semibold text-muted-foreground">{children}</h2>
 	);
 };
 

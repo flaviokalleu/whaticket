@@ -7,6 +7,7 @@ import {
   PrimaryKey,
   ForeignKey,
   BelongsTo,
+  BelongsToMany,
   HasMany,
   AutoIncrement,
   Default
@@ -17,6 +18,8 @@ import Message from "./Message";
 import Queue from "./Queue";
 import User from "./User";
 import Whatsapp from "./Whatsapp";
+import Tag from "./Tag";
+import TicketTag from "./TicketTag";
 
 @Table
 class Ticket extends Model<Ticket> {
@@ -74,6 +77,9 @@ class Ticket extends Model<Ticket> {
 
   @HasMany(() => Message)
   messages: Message[];
+
+  @BelongsToMany(() => Tag, () => TicketTag)
+  tags: Array<Tag & { TicketTag: TicketTag }>;
 }
 
 export default Ticket;

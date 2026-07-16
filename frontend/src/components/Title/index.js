@@ -1,10 +1,9 @@
 import React from "react";
-import Typography from "@mui/material/Typography";
 
 export default function Title(props) {
 	return (
-		<Typography variant="h5" color="primary" gutterBottom>
+		<h1 className="text-xl font-bold tracking-tight text-foreground">
 			{props.children}
-		</Typography>
+		</h1>
 	);
 }

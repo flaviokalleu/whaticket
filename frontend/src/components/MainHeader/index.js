@@ -2,13 +2,7 @@ import React from "react";
 
 const MainHeader = ({ children }) => {
 	return (
-		<div
-			style={{
-				display: "flex",
-				alignItems: "center",
-				padding: "0px 6px 6px 6px",
-			}}
-		>
+		<div className="flex items-center gap-3 px-6 pt-6 pb-4">
 			{children}
 		</div>
 	);

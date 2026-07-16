@@ -2,23 +2,18 @@ import React, { useState, useEffect, useReducer, useRef } from "react";
 
 import { isSameDay, parseISO, format } from "date-fns";
 import openSocket from "../../services/socket-io";
+import {
+  Clock,
+  Check,
+  CheckCheck,
+  ChevronDown,
+  Ban,
+  Download,
+  Loader2,
+} from "lucide-react";
 
-import { green } from "@mui/material/colors";
-import {
-  Button,
-  CircularProgress,
-  Divider,
-  IconButton,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
-import {
-  AccessTime,
-  Block,
-  Done,
-  DoneAll,
-  ExpandMore,
-  GetApp,
-} from "@mui/icons-material";
+import { Button } from "../ui/button";
+import { cn } from "../../lib/utils";
 
 import MarkdownWrapper from "../MarkdownWrapper";
 import VcardPreview from "../VcardPreview";
@@ -30,220 +25,6 @@ import whatsBackground from "../../assets/wa-background.png";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import Audio from "../Audio";
-
-const MessagesListWrapper = styled("div")({
-  overflow: "hidden",
-  position: "relative",
-  display: "flex",
-  flexDirection: "column",
-  flexGrow: 1,
-});
-
-const MessagesListBox = styled("div")(({ theme }) => ({
-  backgroundImage: `url(${whatsBackground})`,
-  display: "flex",
-  flexDirection: "column",
-  flexGrow: 1,
-  padding: "20px 20px 20px 20px",
-  overflowY: "scroll",
-  [theme.breakpoints.down("sm")]: {
-    paddingBottom: "90px",
-  },
-  ...theme.scrollbarStyles,
-}));
-
-const CircleLoading = styled(CircularProgress)({
-  color: green[500],
-  position: "absolute",
-  opacity: "70%",
-  top: 0,
-  left: "50%",
-  marginTop: 12,
-});
-
-const MessageLeft = styled("div")({
-  marginRight: 20,
-  marginTop: 2,
-  minWidth: 100,
-  maxWidth: 600,
-  height: "auto",
-  display: "block",
-  position: "relative",
-  "&:hover #messageActionsButton": {
-    display: "flex",
-    position: "absolute",
-    top: 0,
-    right: 0,
-  },
-
-  whiteSpace: "pre-wrap",
-  backgroundColor: "#ffffff",
-  color: "#303030",
-  alignSelf: "flex-start",
-  borderTopLeftRadius: 0,
-  borderTopRightRadius: 8,
-  borderBottomLeftRadius: 8,
-  borderBottomRightRadius: 8,
-  paddingLeft: 5,
-  paddingRight: 5,
-  paddingTop: 5,
-  paddingBottom: 0,
-  boxShadow: "0 1px 1px #b3b3b3",
-});
-
-const MessageRight = styled("div")({
-  marginLeft: 20,
-  marginTop: 2,
-  minWidth: 100,
-  maxWidth: 600,
-  height: "auto",
-  display: "block",
-  position: "relative",
-  "&:hover #messageActionsButton": {
-    display: "flex",
-    position: "absolute",
-    top: 0,
-    right: 0,
-  },
-
-  whiteSpace: "pre-wrap",
-  backgroundColor: "#dcf8c6",
-  color: "#303030",
-  alignSelf: "flex-end",
-  borderTopLeftRadius: 8,
-  borderTopRightRadius: 8,
-  borderBottomLeftRadius: 8,
-  borderBottomRightRadius: 0,
-  paddingLeft: 5,
-  paddingRight: 5,
-  paddingTop: 5,
-  paddingBottom: 0,
-  boxShadow: "0 1px 1px #b3b3b3",
-});
-
-const QuotedContainer = styled("div", {
-  shouldForwardProp: (prop) => prop !== "fromMe",
-})(({ fromMe }) => ({
-  margin: "-3px -80px 6px -6px",
-  overflow: fromMe ? "hidden" : "hidden",
-  overflowY: fromMe ? "hidden" : undefined,
-  backgroundColor: fromMe ? "#cfe9ba" : "#f0f0f0",
-  borderRadius: "7.5px",
-  display: "flex",
-  position: "relative",
-}));
-
-const QuotedMsg = styled("div")({
-  padding: 10,
-  maxWidth: 300,
-  height: "auto",
-  display: "block",
-  whiteSpace: "pre-wrap",
-  overflow: "hidden",
-});
-
-const QuotedSideColor = styled("span", {
-  shouldForwardProp: (prop) => prop !== "fromMe",
-})(({ fromMe }) => ({
-  flex: "none",
-  width: "4px",
-  backgroundColor: fromMe ? "#35cd96" : "#6bcbef",
-}));
-
-const MessageActionsButton = styled(IconButton)({
-  display: "none",
-  position: "relative",
-  color: "#999",
-  zIndex: 1,
-  backgroundColor: "inherit",
-  opacity: "90%",
-  "&:hover, &.Mui-focusVisible": { backgroundColor: "inherit" },
-});
-
-const MessageContactName = styled("span")({
-  display: "flex",
-  color: "#6bcbef",
-  fontWeight: 500,
-});
-
-const TextContentItem = styled("div", {
-  shouldForwardProp: (prop) => prop !== "isDeleted",
-})(({ isDeleted }) =>
-  isDeleted
-    ? {
-        fontStyle: "italic",
-        color: "rgba(0, 0, 0, 0.36)",
-        overflowWrap: "break-word",
-        padding: "3px 80px 6px 6px",
-      }
-    : {
-        overflowWrap: "break-word",
-        padding: "3px 80px 6px 6px",
-      }
-);
-
-const MessageMedia = styled("video")({
-  objectFit: "cover",
-  width: 250,
-  height: 200,
-  borderTopLeftRadius: 8,
-  borderTopRightRadius: 8,
-  borderBottomLeftRadius: 8,
-  borderBottomRightRadius: 8,
-});
-
-const Timestamp = styled("span")({
-  fontSize: 11,
-  position: "absolute",
-  bottom: 0,
-  right: 5,
-  color: "#999",
-});
-
-const DailyTimestamp = styled("span")({
-  alignItems: "center",
-  textAlign: "center",
-  alignSelf: "center",
-  width: "110px",
-  backgroundColor: "#e1f3fb",
-  margin: "10px",
-  borderRadius: "10px",
-  boxShadow: "0 1px 1px #b3b3b3",
-});
-
-const DailyTimestampText = styled("div")({
-  color: "#808888",
-  padding: 8,
-  alignSelf: "center",
-  marginLeft: "0px",
-});
-
-const ackIconSx = {
-  fontSize: 18,
-  verticalAlign: "middle",
-  marginLeft: "4px",
-};
-
-const ackDoneAllIconSx = {
-  color: green[500],
-  fontSize: 18,
-  verticalAlign: "middle",
-  marginLeft: "4px",
-};
-
-const deletedIconSx = {
-  fontSize: 18,
-  verticalAlign: "middle",
-  marginRight: "4px",
-};
-
-const DownloadMedia = styled("div")({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: "inherit",
-  padding: 10,
-});
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
@@ -434,56 +215,52 @@ const MessagesList = ({ ticketId, isGroup }) => {
       return <Audio url={message.mediaUrl} />
     } else if (message.mediaType === "video") {
       return (
-        <MessageMedia
+        <video
+          className="h-[200px] w-[250px] rounded-lg object-cover"
           src={message.mediaUrl}
           controls
         />
       );
     } else {
       return (
-        <>
-          <DownloadMedia>
-            <Button
-              startIcon={<GetApp />}
-              color="primary"
-              variant="outlined"
-              target="_blank"
-              href={message.mediaUrl}
-            >
+        <div className="flex items-center justify-center gap-2 border-b p-2.5">
+          <Button asChild variant="outline" size="sm">
+            <a href={message.mediaUrl} target="_blank" rel="noopener noreferrer">
+              <Download className="h-4 w-4" />
               Download
-            </Button>
-          </DownloadMedia>
-          <Divider />
-        </>
+            </a>
+          </Button>
+        </div>
       );
     }
   };
 
   const renderMessageAck = (message) => {
     if (message.ack === 0) {
-      return <AccessTime fontSize="small" sx={ackIconSx} />;
+      return <Clock className="ml-1 inline h-3.5 w-3.5 align-middle" />;
     }
     if (message.ack === 1) {
-      return <Done fontSize="small" sx={ackIconSx} />;
+      return <Check className="ml-1 inline h-3.5 w-3.5 align-middle" />;
     }
     if (message.ack === 2) {
-      return <DoneAll fontSize="small" sx={ackIconSx} />;
+      return <CheckCheck className="ml-1 inline h-3.5 w-3.5 align-middle" />;
     }
     if (message.ack === 3 || message.ack === 4) {
-      return <DoneAll fontSize="small" sx={ackDoneAllIconSx} />;
+      return (
+        <CheckCheck className="ml-1 inline h-3.5 w-3.5 align-middle text-emerald-500" />
+      );
     }
   };
 
   const renderDailyTimestamps = (message, index) => {
     if (index === 0) {
       return (
-        <DailyTimestamp
+        <div
           key={`timestamp-${message.id}`}
+          className="mx-auto my-2.5 w-fit self-center rounded-full bg-sky-100 px-3 py-1 text-center text-xs text-slate-600 shadow-sm dark:bg-sky-900/40 dark:text-sky-200"
         >
-          <DailyTimestampText>
-            {format(parseISO(messagesList[index].createdAt), "dd/MM/yyyy")}
-          </DailyTimestampText>
-        </DailyTimestamp>
+          {format(parseISO(messagesList[index].createdAt), "dd/MM/yyyy")}
+        </div>
       );
     }
     if (index < messagesList.length - 1) {
@@ -492,13 +269,12 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
       if (!isSameDay(messageDay, previousMessageDay)) {
         return (
-          <DailyTimestamp
+          <div
             key={`timestamp-${message.id}`}
+            className="mx-auto my-2.5 w-fit self-center rounded-full bg-sky-100 px-3 py-1 text-center text-xs text-slate-600 shadow-sm dark:bg-sky-900/40 dark:text-sky-200"
           >
-            <DailyTimestampText>
-              {format(parseISO(messagesList[index].createdAt), "dd/MM/yyyy")}
-            </DailyTimestampText>
-          </DailyTimestamp>
+            {format(parseISO(messagesList[index].createdAt), "dd/MM/yyyy")}
+          </div>
         );
       }
     }
@@ -519,28 +295,39 @@ const MessagesList = ({ ticketId, isGroup }) => {
       let previousMessageUser = messagesList[index - 1].fromMe;
 
       if (messageUser !== previousMessageUser) {
-        return (
-          <span style={{ marginTop: 16 }} key={`divider-${message.id}`}></span>
-        );
+        return <span className="mt-4" key={`divider-${message.id}`}></span>;
       }
     }
   };
 
   const renderQuotedMessage = (message) => {
     return (
-      <QuotedContainer fromMe={message.fromMe}>
-        <QuotedSideColor fromMe={message.quotedMsg?.fromMe} />
-        <QuotedMsg>
+      <div
+        className={cn(
+          "-mx-1.5 -my-0.5 mb-1.5 flex overflow-hidden rounded-lg",
+          message.fromMe ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-muted"
+        )}
+      >
+        <span
+          className={cn(
+            "w-1 shrink-0",
+            message.quotedMsg?.fromMe ? "bg-emerald-400" : "bg-sky-400"
+          )}
+        />
+        <div className="min-w-0 overflow-hidden whitespace-pre-wrap p-2.5 text-sm">
           {!message.quotedMsg?.fromMe && (
-            <MessageContactName>
+            <span className="flex font-medium text-sky-500">
               {message.quotedMsg?.contact?.name}
-            </MessageContactName>
+            </span>
           )}
           {message.quotedMsg?.body}
-        </QuotedMsg>
-      </QuotedContainer>
+        </div>
+      </div>
     );
   };
+
+  const bubbleBase =
+    "relative mt-0.5 block h-auto max-w-[85%] whitespace-pre-wrap break-words rounded-lg px-2.5 pb-1 pt-1.5 shadow-sm sm:max-w-[600px]";
 
   const renderMessages = () => {
     if (messagesList.length > 0) {
@@ -550,32 +337,31 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
-              <MessageLeft>
-                <MessageActionsButton
-                  variant="contained"
-                  size="small"
+              <div className={cn(bubbleBase, "group mr-5 self-start bg-white text-slate-800 dark:bg-slate-800 dark:text-slate-100")}>
+                <button
+                  type="button"
                   id="messageActionsButton"
                   disabled={message.isDeleted}
                   onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
+                  className="absolute right-0 top-0 hidden h-7 w-7 items-center justify-center rounded-full bg-inherit text-muted-foreground opacity-90 group-hover:flex hover:bg-black/5"
                 >
-                  <ExpandMore />
-                </MessageActionsButton>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
                 {isGroup && (
-                  <MessageContactName>
+                  <span className="flex font-medium text-sky-500">
                     {message.contact?.name}
-                  </MessageContactName>
+                  </span>
                 )}
                 {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
-                  //|| message.mediaType === "multi_vcard"
                 ) && checkMessageMedia(message)}
-                <TextContentItem>
+                <div className="break-words pb-1 pr-16 pt-0.5">
                   {message.quotedMsg && renderQuotedMessage(message)}
                   <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                  <Timestamp>
+                  <span className="absolute bottom-0.5 right-1.5 text-[11px] text-muted-foreground">
                     {format(parseISO(message.createdAt), "HH:mm")}
-                  </Timestamp>
-                </TextContentItem>
-              </MessageLeft>
+                  </span>
+                </div>
+              </div>
             </React.Fragment>
           );
         } else {
@@ -583,35 +369,35 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
-              <MessageRight>
-                <MessageActionsButton
-                  variant="contained"
-                  size="small"
+              <div className={cn(bubbleBase, "group ml-5 self-end bg-emerald-100 text-slate-800 dark:bg-emerald-900/40 dark:text-slate-100")}>
+                <button
+                  type="button"
                   id="messageActionsButton"
                   disabled={message.isDeleted}
                   onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
+                  className="absolute right-0 top-0 hidden h-7 w-7 items-center justify-center rounded-full bg-inherit text-muted-foreground opacity-90 group-hover:flex hover:bg-black/5"
                 >
-                  <ExpandMore />
-                </MessageActionsButton>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
                 {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
-                  //|| message.mediaType === "multi_vcard"
                 ) && checkMessageMedia(message)}
-                <TextContentItem isDeleted={message.isDeleted}>
+                <div
+                  className={cn(
+                    "break-words pb-1 pr-16 pt-0.5",
+                    message.isDeleted && "italic text-muted-foreground"
+                  )}
+                >
                   {message.isDeleted && (
-                    <Block
-                      color="disabled"
-                      fontSize="small"
-                      sx={deletedIconSx}
-                    />
+                    <Ban className="mr-1 inline h-3.5 w-3.5 align-middle" />
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
                   <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                  <Timestamp>
+                  <span className="absolute bottom-0.5 right-1.5 flex items-center text-[11px] text-muted-foreground">
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
-                  </Timestamp>
-                </TextContentItem>
-              </MessageRight>
+                  </span>
+                </div>
+              </div>
             </React.Fragment>
           );
         }
@@ -623,22 +409,27 @@ const MessagesList = ({ ticketId, isGroup }) => {
   };
 
   return (
-    <MessagesListWrapper>
+    <div className="relative flex flex-1 flex-col overflow-hidden">
       <MessageOptionsMenu
         message={selectedMessage}
         anchorEl={anchorEl}
         menuOpen={messageOptionsMenuOpen}
         handleClose={handleCloseMessageOptionsMenu}
       />
-      <MessagesListBox id="messagesList" onScroll={handleScroll}>
+      <div
+        id="messagesList"
+        onScroll={handleScroll}
+        className="flex flex-1 flex-col overflow-y-auto bg-repeat p-5 pb-24 sm:pb-5"
+        style={{ backgroundImage: `url(${whatsBackground})` }}
+      >
         {messagesList.length > 0 ? renderMessages() : []}
-      </MessagesListBox>
+      </div>
       {loading && (
-        <div>
-          <CircleLoading />
+        <div className="absolute left-1/2 top-3 -translate-x-1/2">
+          <Loader2 className="h-6 w-6 animate-spin text-emerald-500 opacity-70" />
         </div>
       )}
-    </MessagesListWrapper>
+    </div>
   );
 };
 

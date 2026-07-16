@@ -10,6 +10,7 @@ import UpdateTicketService from "../services/TicketServices/UpdateTicketService"
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import ShowUserService from "../services/UserServices/ShowUserService";
+import UpdateTicketTagsService from "../services/TicketServices/UpdateTicketTagsService";
 import formatBody from "../helpers/Mustache";
 
 const checkTicketAccess = async (
@@ -103,6 +104,27 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   await checkTicketAccess(req, contact);
 
   return res.status(200).json(contact);
+};
+
+export const updateTags = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { tagIds } = req.body;
+
+  const existingTicket = await ShowTicketService(ticketId);
+  await checkTicketAccess(req, existingTicket);
+
+  const ticket = await UpdateTicketTagsService(ticketId, tagIds || []);
+
+  const io = getIO();
+  io.to(ticket.status).to(ticketId).emit("ticket", {
+    action: "update",
+    ticket
+  });
+
+  return res.status(200).json(ticket);
 };
 
 export const update = async (

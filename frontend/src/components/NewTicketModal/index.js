@@ -1,28 +1,23 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useHistory } from "react-router-dom";
+import { Loader2, UserPlus, Search } from "lucide-react";
 
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Autocomplete, {
-	createFilterOptions,
-} from "@mui/material/Autocomplete";
-import CircularProgress from "@mui/material/CircularProgress";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
-import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-
-const filter = createFilterOptions({
-	trim: true,
-});
+import { cn } from "../../lib/utils";
 
 const NewTicketModal = ({ modalOpen, onClose }) => {
 	const history = useHistory();
@@ -34,6 +29,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 	const [newContact, setNewContact] = useState({});
 	const [contactModalOpen, setContactModalOpen] = useState(false);
 	const { user } = useContext(AuthContext);
+	const inputRef = useRef();
 
 	useEffect(() => {
 		if (!modalOpen || searchParam.length < 3) {
@@ -63,10 +59,11 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 	const handleClose = () => {
 		onClose();
 		setSearchParam("");
+		setOptions([]);
 		setSelectedContact(null);
 	};
 
-	const handleSaveTicket = async contactId => {
+	const handleSaveTicket = async (contactId) => {
 		if (!contactId) return;
 		setLoading(true);
 		try {
@@ -83,50 +80,24 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 		handleClose();
 	};
 
-	const handleSelectOption = (e, newValue) => {
-		if (newValue?.number) {
-			setSelectedContact(newValue);
-		} else if (newValue?.name) {
-			setNewContact({ name: newValue.name });
-			setContactModalOpen(true);
-		}
+	const handleSelectOption = (contact) => {
+		setSelectedContact(contact);
+		setSearchParam(contact.name);
+		setOptions([]);
 	};
 
 	const handleCloseContactModal = () => {
 		setContactModalOpen(false);
 	};
 
-	const handleAddNewContactTicket = contact => {
+	const handleAddNewContactTicket = (contact) => {
 		handleSaveTicket(contact.id);
 	};
 
-	const createAddContactOption = (filterOptions, params) => {
-		const filtered = filter(filterOptions, params);
-
-		if (params.inputValue !== "" && !loading && searchParam.length >= 3) {
-			filtered.push({
-				name: `${params.inputValue}`,
-			});
-		}
-
-		return filtered;
-	};
-
-	const renderOption = option => {
-		if (option.number) {
-			return `${option.name} - ${option.number}`;
-		} else {
-			return `${i18n.t("newTicketModal.add")} ${option.name}`;
-		}
-	};
-
-	const renderOptionLabel = option => {
-		if (option.number) {
-			return `${option.name} - ${option.number}`;
-		} else {
-			return `${option.name}`;
-		}
-	};
+	const showCreateOption =
+		searchParam.length >= 3 &&
+		!loading &&
+		!options.some((o) => o.name.toLowerCase() === searchParam.toLowerCase());
 
 	return (
 		<>
@@ -135,72 +106,80 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 				initialValues={newContact}
 				onClose={handleCloseContactModal}
 				onSave={handleAddNewContactTicket}
-			></ContactModal>
-			<Dialog open={modalOpen} onClose={handleClose}>
-				<DialogTitle id="form-dialog-title">
-					{i18n.t("newTicketModal.title")}
-				</DialogTitle>
-				<DialogContent dividers>
-					<Autocomplete
-						options={options}
-						loading={loading}
-						style={{ width: 300 }}
-						clearOnBlur
-						autoHighlight
-						freeSolo
-						clearOnEscape
-						getOptionLabel={renderOptionLabel}
-						renderOption={renderOption}
-						filterOptions={createAddContactOption}
-						onChange={(e, newValue) => handleSelectOption(e, newValue)}
-						renderInput={params => (
-							<TextField
-								{...params}
-								label={i18n.t("newTicketModal.fieldLabel")}
-								variant="outlined"
-								autoFocus
-								onChange={e => setSearchParam(e.target.value)}
-								onKeyPress={e => {
-									if (loading || !selectedContact) return;
-									else if (e.key === "Enter") {
-										handleSaveTicket(selectedContact.id);
-									}
-								}}
-								InputProps={{
-									...params.InputProps,
-									endAdornment: (
-										<React.Fragment>
-											{loading ? (
-												<CircularProgress color="inherit" size={20} />
-											) : null}
-											{params.InputProps.endAdornment}
-										</React.Fragment>
-									),
-								}}
-							/>
+			/>
+			<Dialog open={modalOpen} onOpenChange={(o) => !o && handleClose()}>
+				<DialogContent className="sm:max-w-sm">
+					<DialogHeader>
+						<DialogTitle>{i18n.t("newTicketModal.title")}</DialogTitle>
+					</DialogHeader>
+
+					<div className="relative">
+						<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+						<Input
+							ref={inputRef}
+							autoFocus
+							className="pl-9"
+							placeholder={i18n.t("newTicketModal.fieldLabel")}
+							value={searchParam}
+							onChange={(e) => {
+								setSearchParam(e.target.value);
+								setSelectedContact(null);
+							}}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" && selectedContact) {
+									handleSaveTicket(selectedContact.id);
+								}
+							}}
+						/>
+						{loading && (
+							<Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
 						)}
-					/>
+					</div>
+
+					{(options.length > 0 || showCreateOption) && !selectedContact && (
+						<div className="max-h-56 overflow-y-auto rounded-md border">
+							{options.map((option) => (
+								<button
+									key={option.id}
+									type="button"
+									className={cn(
+										"flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent"
+									)}
+									onClick={() => handleSelectOption(option)}
+								>
+									<span className="font-medium">{option.name}</span>
+									<span className="text-xs text-muted-foreground">{option.number}</span>
+								</button>
+							))}
+							{showCreateOption && (
+								<button
+									type="button"
+									className="flex w-full items-center gap-2 border-t px-3 py-2 text-left text-sm text-primary hover:bg-accent"
+									onClick={() => {
+										setNewContact({ name: searchParam });
+										setContactModalOpen(true);
+									}}
+								>
+									<UserPlus className="h-4 w-4" />
+									{i18n.t("newTicketModal.add")} "{searchParam}"
+								</button>
+							)}
+						</div>
+					)}
+
+					<DialogFooter>
+						<Button variant="outline" onClick={handleClose} disabled={loading}>
+							{i18n.t("newTicketModal.buttons.cancel")}
+						</Button>
+						<Button
+							disabled={!selectedContact || loading}
+							onClick={() => handleSaveTicket(selectedContact.id)}
+						>
+							{loading && <Loader2 className="h-4 w-4 animate-spin" />}
+							{i18n.t("newTicketModal.buttons.ok")}
+						</Button>
+					</DialogFooter>
 				</DialogContent>
-				<DialogActions>
-					<Button
-						onClick={handleClose}
-						color="secondary"
-						disabled={loading}
-						variant="outlined"
-					>
-						{i18n.t("newTicketModal.buttons.cancel")}
-					</Button>
-					<ButtonWithSpinner
-						variant="contained"
-						type="button"
-						disabled={!selectedContact}
-						onClick={() => handleSaveTicket(selectedContact.id)}
-						color="primary"
-						loading={loading}
-					>
-						{i18n.t("newTicketModal.buttons.ok")}
-					</ButtonWithSpinner>
-				</DialogActions>
 			</Dialog>
 		</>
 	);

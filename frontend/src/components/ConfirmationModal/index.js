@@ -1,43 +1,38 @@
 import React from "react";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Typography from "@mui/material/Typography";
+import { Button } from "../ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "../ui/dialog";
 
 import { i18n } from "../../translate/i18n";
 
 const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
 	return (
-		<Dialog
-			open={open}
-			onClose={() => onClose(false)}
-			aria-labelledby="confirm-dialog"
-		>
-			<DialogTitle id="confirm-dialog">{title}</DialogTitle>
-			<DialogContent dividers>
-				<Typography>{children}</Typography>
+		<Dialog open={open} onOpenChange={() => onClose(false)}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>{title}</DialogTitle>
+				</DialogHeader>
+				<p className="text-sm text-muted-foreground">{children}</p>
+				<DialogFooter>
+					<Button variant="outline" onClick={() => onClose(false)}>
+						{i18n.t("confirmationModal.buttons.cancel")}
+					</Button>
+					<Button
+						variant="destructive"
+						onClick={() => {
+							onClose(false);
+							onConfirm();
+						}}
+					>
+						{i18n.t("confirmationModal.buttons.confirm")}
+					</Button>
+				</DialogFooter>
 			</DialogContent>
-			<DialogActions>
-				<Button
-					variant="contained"
-					onClick={() => onClose(false)}
-					color="inherit"
-				>
-					{i18n.t("confirmationModal.buttons.cancel")}
-				</Button>
-				<Button
-					variant="contained"
-					onClick={() => {
-						onClose(false);
-						onConfirm();
-					}}
-					color="secondary"
-				>
-					{i18n.t("confirmationModal.buttons.confirm")}
-				</Button>
-			</DialogActions>
 		</Dialog>
 	);
 };

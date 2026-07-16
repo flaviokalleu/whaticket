@@ -1,47 +1,50 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useHistory } from "react-router-dom";
+import { Loader2, ChevronDown, Check, User as UserIcon } from "lucide-react";
 
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Autocomplete, {
-	createFilterOptions,
-} from "@mui/material/Autocomplete";
-import CircularProgress from "@mui/material/CircularProgress";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../ui/select";
+import { cn } from "../../lib/utils";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
-import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import useQueues from "../../hooks/useQueues";
 import useWhatsApps from "../../hooks/useWhatsApps";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../Can";
 
-const filterOptions = createFilterOptions({
-	trim: true,
-});
-
 const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId }) => {
 	const history = useHistory();
+	const [userPopoverOpen, setUserPopoverOpen] = useState(false);
 	const [options, setOptions] = useState([]);
 	const [queues, setQueues] = useState([]);
 	const [allQueues, setAllQueues] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [searching, setSearching] = useState(false);
 	const [searchParam, setSearchParam] = useState("");
 	const [selectedUser, setSelectedUser] = useState(null);
-	const [selectedQueue, setSelectedQueue] = useState('');
+	const [selectedQueue, setSelectedQueue] = useState("");
 	const [selectedWhatsapp, setSelectedWhatsapp] = useState(ticketWhatsappId);
 	const { findAll: findAllQueues } = useQueues();
 	const { loadingWhatsapps, whatsApps } = useWhatsApps();
+	const searchInputRef = useRef(null);
 
 	const { user: loggedInUser } = useContext(AuthContext);
 
@@ -50,17 +53,17 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 			const list = await findAllQueues();
 			setAllQueues(list);
 			setQueues(list);
-		}
+		};
 		loadQueues();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
 		if (!modalOpen || searchParam.length < 3) {
-			setLoading(false);
+			setSearching(false);
 			return;
 		}
-		setLoading(true);
+		setSearching(true);
 		const delayDebounceFn = setTimeout(() => {
 			const fetchUsers = async () => {
 				try {
@@ -68,9 +71,9 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 						params: { searchParam },
 					});
 					setOptions(data.users);
-					setLoading(false);
+					setSearching(false);
 				} catch (err) {
-					setLoading(false);
+					setSearching(false);
 					toastError(err);
 				}
 			};
@@ -86,7 +89,18 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 		setSelectedUser(null);
 	};
 
-	const handleSaveTicket = async e => {
+	const handleSelectUser = (user) => {
+		setSelectedUser(user);
+		setUserPopoverOpen(false);
+		if (user != null && Array.isArray(user.queues)) {
+			setQueues(user.queues);
+		} else {
+			setQueues(allQueues);
+			setSelectedQueue("");
+		}
+	};
+
+	const handleSaveTicket = async (e) => {
 		e.preventDefault();
 		if (!ticketid) return;
 		setLoading(true);
@@ -94,19 +108,19 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 			let data = {};
 
 			if (selectedUser) {
-				data.userId = selectedUser.id
+				data.userId = selectedUser.id;
 			}
 
 			if (selectedQueue && selectedQueue !== null) {
-				data.queueId = selectedQueue
+				data.queueId = selectedQueue;
 
 				if (!selectedUser) {
-					data.status = 'pending';
+					data.status = "pending";
 					data.userId = null;
 				}
 			}
 
-			if(selectedWhatsapp) {
+			if (selectedWhatsapp) {
 				data.whatsappId = selectedWhatsapp;
 			}
 
@@ -121,103 +135,132 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 	};
 
 	return (
-		<Dialog open={modalOpen} onClose={handleClose} maxWidth="lg" scroll="paper">
-			<form onSubmit={handleSaveTicket}>
-				<DialogTitle id="form-dialog-title">
-					{i18n.t("transferTicketModal.title")}
-				</DialogTitle>
-				<DialogContent dividers>
-					<Autocomplete
-						style={{ width: 300, marginBottom: 20 }}
-						getOptionLabel={option => `${option.name}`}
-						onChange={(e, newValue) => {
-							setSelectedUser(newValue);
-							if (newValue != null && Array.isArray(newValue.queues)) {
-								setQueues(newValue.queues);
-							} else {
-								setQueues(allQueues);
-								setSelectedQueue('');
-							}
-						}}
-						options={options}
-						filterOptions={filterOptions}
-						freeSolo
-						autoHighlight
-						noOptionsText={i18n.t("transferTicketModal.noOptions")}
-						loading={loading}
-						renderInput={params => (
-							<TextField
-								{...params}
-								label={i18n.t("transferTicketModal.fieldLabel")}
-								variant="outlined"
-								required
-								autoFocus
-								onChange={e => setSearchParam(e.target.value)}
-								InputProps={{
-									...params.InputProps,
-									endAdornment: (
-										<React.Fragment>
-											{loading ? (
-												<CircularProgress color="inherit" size={20} />
-											) : null}
-											{params.InputProps.endAdornment}
-										</React.Fragment>
-									),
-								}}
-							/>
-						)}
-					/>
-					<FormControl variant="outlined" sx={{ width: "100%" }}>
-						<InputLabel>{i18n.t("transferTicketModal.fieldQueueLabel")}</InputLabel>
-						<Select
-							value={selectedQueue}
-							onChange={(e) => setSelectedQueue(e.target.value)}
-							label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
+		<Dialog open={modalOpen} onOpenChange={(o) => !o && handleClose()}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>{i18n.t("transferTicketModal.title")}</DialogTitle>
+				</DialogHeader>
+				<form onSubmit={handleSaveTicket} className="space-y-4">
+					<div className="space-y-1.5">
+						<Label>{i18n.t("transferTicketModal.fieldLabel")}</Label>
+						<Popover
+							open={userPopoverOpen}
+							onOpenChange={(o) => {
+								setUserPopoverOpen(o);
+								if (o) setTimeout(() => searchInputRef.current?.focus(), 0);
+							}}
 						>
-							<MenuItem value={''}>&nbsp;</MenuItem>
-							{queues.map((queue) => (
-								<MenuItem key={queue.id} value={queue.id}>{queue.name}</MenuItem>
-							))}
+							<PopoverTrigger asChild>
+								<button
+									type="button"
+									className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+								>
+									<UserIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+									<span className={cn("flex-1 truncate text-left", !selectedUser && "text-muted-foreground")}>
+										{selectedUser ? selectedUser.name : i18n.t("transferTicketModal.fieldLabel")}
+									</span>
+									<ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+								</button>
+							</PopoverTrigger>
+							<PopoverContent className="w-[--radix-popover-trigger-width] p-1" align="start">
+								<Input
+									ref={searchInputRef}
+									placeholder={i18n.t("transferTicketModal.fieldLabel")}
+									value={searchParam}
+									onChange={(e) => setSearchParam(e.target.value)}
+									className="mb-1"
+								/>
+								<div className="max-h-52 overflow-y-auto">
+									{searching && (
+										<div className="flex items-center justify-center py-3">
+											<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+										</div>
+									)}
+									{!searching && searchParam.length >= 3 && options.length === 0 && (
+										<p className="px-2 py-1.5 text-sm text-muted-foreground">
+											{i18n.t("transferTicketModal.noOptions")}
+										</p>
+									)}
+									{!searching &&
+										options.map((option) => (
+											<button
+												type="button"
+												key={option.id}
+												onClick={() => handleSelectUser(option)}
+												className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent"
+											>
+												<Check
+													className={cn(
+														"h-3.5 w-3.5 shrink-0",
+														selectedUser?.id === option.id ? "opacity-100" : "opacity-0"
+													)}
+												/>
+												{option.name}
+											</button>
+										))}
+								</div>
+							</PopoverContent>
+						</Popover>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label>{i18n.t("transferTicketModal.fieldQueueLabel")}</Label>
+						<Select
+							value={selectedQueue ? String(selectedQueue) : "none"}
+							onValueChange={(v) => setSelectedQueue(v === "none" ? "" : v)}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder={i18n.t("transferTicketModal.fieldQueuePlaceholder")} />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="none">&nbsp;</SelectItem>
+								{queues.map((queue) => (
+									<SelectItem key={queue.id} value={String(queue.id)}>
+										{queue.name}
+									</SelectItem>
+								))}
+							</SelectContent>
 						</Select>
-					</FormControl>
+					</div>
+
 					<Can
 						role={loggedInUser.profile}
 						perform="ticket-options:transferWhatsapp"
-						yes={() => (!loadingWhatsapps && 
-							<FormControl variant="outlined" sx={{ width: "100%" }} style={{ marginTop: 20 }}>
-								<InputLabel>{i18n.t("transferTicketModal.fieldConnectionLabel")}</InputLabel>
-								<Select
-									value={selectedWhatsapp}
-									onChange={(e) => setSelectedWhatsapp(e.target.value)}
-									label={i18n.t("transferTicketModal.fieldConnectionPlaceholder")}
-								>
-									{whatsApps.map((whasapp) => (
-										<MenuItem key={whasapp.id} value={whasapp.id}>{whasapp.name}</MenuItem>
-									))}
-								</Select>
-							</FormControl>
-						)}
+						yes={() =>
+							!loadingWhatsapps && (
+								<div className="space-y-1.5">
+									<Label>{i18n.t("transferTicketModal.fieldConnectionLabel")}</Label>
+									<Select
+										value={selectedWhatsapp ? String(selectedWhatsapp) : undefined}
+										onValueChange={(v) => setSelectedWhatsapp(v)}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder={i18n.t("transferTicketModal.fieldConnectionPlaceholder")} />
+										</SelectTrigger>
+										<SelectContent>
+											{whatsApps.map((whasapp) => (
+												<SelectItem key={whasapp.id} value={String(whasapp.id)}>
+													{whasapp.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+							)
+						}
 					/>
-				</DialogContent>
-				<DialogActions>
-					<Button
-						onClick={handleClose}
-						color="secondary"
-						disabled={loading}
-						variant="outlined"
-					>
-						{i18n.t("transferTicketModal.buttons.cancel")}
-					</Button>
-					<ButtonWithSpinner
-						variant="contained"
-						type="submit"
-						color="primary"
-						loading={loading}
-					>
-						{i18n.t("transferTicketModal.buttons.ok")}
-					</ButtonWithSpinner>
-				</DialogActions>
-			</form>
+
+					<DialogFooter>
+						<Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+							{i18n.t("transferTicketModal.buttons.cancel")}
+						</Button>
+						<Button type="submit" disabled={loading}>
+							{loading && <Loader2 className="h-4 w-4 animate-spin" />}
+							{i18n.t("transferTicketModal.buttons.ok")}
+						</Button>
+					</DialogFooter>
+				</form>
+			</DialogContent>
 		</Dialog>
 	);
 };

@@ -1,84 +1,44 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
-import { styled } from "@mui/material/styles";
+import { MessageSquareText } from "lucide-react";
 
 import TicketsManager from "../../components/TicketsManager/";
 import Ticket from "../../components/Ticket/";
 
 import { i18n } from "../../translate/i18n";
-import Hidden from "@mui/material/Hidden";
-
-const ChatContainer = styled("div")(({ theme }) => ({
-  flex: 1,
-  height: `calc(100% - 48px)`,
-  overflowY: "hidden",
-  backgroundColor: theme.palette.background.default,
-}));
-
-const ChatPapper = styled("div")(({ theme }) => ({
-  display: "flex",
-  height: "100%",
-  backgroundColor: theme.palette.background.paper,
-}));
-
-const ContactsGrid = styled(Grid, {
-  shouldForwardProp: (prop) => prop !== "closed",
-})(({ theme, closed }) => ({
-  display: "flex",
-  height: "100%",
-  flexDirection: "column",
-  overflowY: "hidden",
-  ...(closed && {
-    [theme.breakpoints.down("sm")]: {
-      display: "none",
-    },
-  }),
-}));
-
-const MessagesGrid = styled(Grid)(() => ({
-  display: "flex",
-  height: "100%",
-  flexDirection: "column",
-}));
-
-const WelcomeMsgPaper = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  display: "flex",
-  justifyContent: "space-evenly",
-  alignItems: "center",
-  height: "100%",
-  textAlign: "center",
-  borderRadius: 0,
-}));
 
 const Chat = () => {
   const { ticketId } = useParams();
 
   return (
-    <ChatContainer>
-      <ChatPapper>
-        <Grid container spacing={0}>
-          <ContactsGrid item xs={12} md={4} closed={!!ticketId}>
-            <TicketsManager />
-          </ContactsGrid>
-          <MessagesGrid item xs={12} md={8}>
-            {ticketId ? (
-              <>
-                <Ticket />
-              </>
-            ) : (
-              <Hidden only={["sm", "xs"]}>
-                <WelcomeMsgPaper>
-                  <span>{i18n.t("chat.noTicketMessage")}</span>
-                </WelcomeMsgPaper>
-              </Hidden>
-            )}
-          </MessagesGrid>
-        </Grid>
-      </ChatPapper>
-    </ChatContainer>
+    <div className="flex h-full min-h-0 flex-1 overflow-hidden">
+      <div
+        className={`h-full w-full shrink-0 overflow-hidden border-r sm:w-[380px] ${
+          ticketId ? "hidden sm:block" : "block"
+        }`}
+      >
+        <TicketsManager />
+      </div>
+      <div className="hidden min-h-0 flex-1 sm:flex">
+        {ticketId ? (
+          <Ticket />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-muted/30 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <MessageSquareText className="h-7 w-7" />
+            </div>
+            <span className="max-w-xs text-sm text-muted-foreground">
+              {i18n.t("chat.noTicketMessage")}
+            </span>
+          </div>
+        )}
+      </div>
+      {ticketId && (
+        <div className="flex min-h-0 flex-1 sm:hidden">
+          <Ticket />
+        </div>
+      )}
+    </div>
   );
 };
 

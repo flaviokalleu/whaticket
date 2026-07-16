@@ -1,10 +1,9 @@
 import React from "react";
-
-import Card from "@mui/material/Card";
-import Button from "@mui/material/Button";
-import TicketHeaderSkeleton from "../TicketHeaderSkeleton";
-import ArrowBackIos from "@mui/icons-material/ArrowBackIos";
+import { ChevronLeft } from "lucide-react";
 import { useHistory } from "react-router-dom";
+
+import { Button } from "../ui/button";
+import TicketHeaderSkeleton from "../TicketHeaderSkeleton";
 
 const TicketHeader = ({ loading, children }) => {
   const history = useHistory();
@@ -12,30 +11,22 @@ const TicketHeader = ({ loading, children }) => {
     history.push("/tickets");
   };
 
+  if (loading) {
+    return <TicketHeaderSkeleton />;
+  }
+
   return (
-    <>
-      {loading ? (
-        <TicketHeaderSkeleton />
-      ) : (
-        <Card
-          square
-          sx={(theme) => ({
-            display: "flex",
-            backgroundColor: "#eee",
-            flex: "none",
-            borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-            [theme.breakpoints.down("sm")]: {
-              flexWrap: "wrap",
-            },
-          })}
-        >
-          <Button color="primary" onClick={handleBack}>
-            <ArrowBackIos />
-          </Button>
-          {children}
-        </Card>
-      )}
-    </>
+    <div className="flex flex-none items-center gap-2 border-b bg-background px-3 py-2 shadow-sm">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleBack}
+        className="shrink-0 sm:hidden"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </Button>
+      {children}
+    </div>
   );
 };
 

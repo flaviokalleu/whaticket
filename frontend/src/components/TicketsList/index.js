@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
 import openSocket from "../../services/socket-io";
-
-import { styled } from "@mui/material/styles";
-import List from "@mui/material/List";
-import Paper from "@mui/material/Paper";
+import { Inbox } from "lucide-react";
 
 import TicketListItem from "../TicketListItem";
 import TicketsListSkeleton from "../TicketsListSkeleton";
@@ -11,46 +8,6 @@ import TicketsListSkeleton from "../TicketsListSkeleton";
 import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
-
-const TicketsListWrapper = styled(Paper)({
-	position: "relative",
-	display: "flex",
-	height: "100%",
-	flexDirection: "column",
-	overflow: "hidden",
-	borderTopRightRadius: 0,
-	borderBottomRightRadius: 0,
-});
-
-const TicketsListPaper = styled(Paper)(({ theme }) => ({
-	flex: 1,
-	overflowY: "scroll",
-	...theme.scrollbarStyles,
-	borderTop: "2px solid rgba(0, 0, 0, 0.12)",
-}));
-
-const NoTicketsDiv = styled("div")({
-	display: "flex",
-	height: "100px",
-	margin: 40,
-	flexDirection: "column",
-	alignItems: "center",
-	justifyContent: "center",
-});
-
-const NoTicketsTitle = styled("span")({
-	textAlign: "center",
-	fontSize: "16px",
-	fontWeight: "600",
-	margin: "0px",
-});
-
-const NoTicketsText = styled("p")({
-	textAlign: "center",
-	color: "rgb(104, 121, 146)",
-	fontSize: "14px",
-	lineHeight: "1.4",
-});
 
 const reducer = (state, action) => {
 	if (action.type === "LOAD_TICKETS") {
@@ -249,34 +206,26 @@ const TicketsList = (props) => {
 	};
 
 	return (
-		<TicketsListWrapper style={style}>
-			<TicketsListPaper
-				square
-				name="closed"
-				elevation={0}
-				onScroll={handleScroll}
-			>
-				<List style={{ paddingTop: 0 }}>
-					{ticketsList.length === 0 && !loading ? (
-						<NoTicketsDiv>
-							<NoTicketsTitle>
-								{i18n.t("ticketsList.noTicketsTitle")}
-							</NoTicketsTitle>
-							<NoTicketsText>
-								{i18n.t("ticketsList.noTicketsMessage")}
-							</NoTicketsText>
-						</NoTicketsDiv>
-					) : (
-						<>
-							{ticketsList.map(ticket => (
-								<TicketListItem ticket={ticket} key={ticket.id} />
-							))}
-						</>
-					)}
-					{loading && <TicketsListSkeleton />}
-				</List>
-			</TicketsListPaper>
-		</TicketsListWrapper>
+		<div className="relative flex h-full flex-col overflow-hidden" style={style}>
+			<div className="flex-1 overflow-y-auto" onScroll={handleScroll}>
+				{ticketsList.length === 0 && !loading ? (
+					<div className="flex h-full flex-col items-center justify-center gap-2 px-10 py-16 text-center">
+						<Inbox className="h-8 w-8 text-muted-foreground/50" />
+						<p className="text-sm font-semibold">
+							{i18n.t("ticketsList.noTicketsTitle")}
+						</p>
+						<p className="text-xs text-muted-foreground">
+							{i18n.t("ticketsList.noTicketsMessage")}
+						</p>
+					</div>
+				) : (
+					ticketsList.map(ticket => (
+						<TicketListItem ticket={ticket} key={ticket.id} />
+					))
+				)}
+				{loading && <TicketsListSkeleton />}
+			</div>
+		</div>
 	);
 };
 

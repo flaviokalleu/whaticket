@@ -1,49 +1,52 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Repeat,
+  MessageCircle,
+  Contact,
+  Network,
+  MessagesSquare,
+  Users,
+  Settings,
+  Tag,
+} from "lucide-react";
 
-import ListItem from "@mui/material/ListItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import ListSubheader from "@mui/material/ListSubheader";
-import Divider from "@mui/material/Divider";
-import { Badge } from "@mui/material";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import SyncAltIcon from "@mui/icons-material/SyncAlt";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
-import ContactPhoneOutlinedIcon from "@mui/icons-material/ContactPhoneOutlined";
-import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
-import QuestionAnswerOutlinedIcon from "@mui/icons-material/QuestionAnswerOutlined";
-
+import { cn } from "../lib/utils";
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
 import { Can } from "../components/Can";
 
-function ListItemLink(props) {
-  const { icon, primary, to, className } = props;
-
-  const renderLink = React.useMemo(
-    () =>
-      React.forwardRef((itemProps, ref) => (
-        <RouterLink to={to} ref={ref} {...itemProps} />
-      )),
-    [to]
-  );
-
+function NavItem({ to, icon: Icon, label, badge, onClick, collapsed }) {
   return (
-    <li>
-      <ListItem button component={renderLink} className={className}>
-        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-        <ListItemText primary={primary} />
-      </ListItem>
-    </li>
+    <NavLink
+      to={to}
+      onClick={onClick}
+      className={({ isActive }) =>
+        cn(
+          "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+          "hover:bg-accent hover:text-accent-foreground",
+          isActive
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground"
+        )
+      }
+    >
+      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+        <Icon className="h-[18px] w-[18px]" />
+        {badge && (
+          <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+            !
+          </span>
+        )}
+      </span>
+      {!collapsed && <span className="truncate">{label}</span>}
+    </NavLink>
   );
 }
 
-const MainListItems = (props) => {
-  const { drawerClose } = props;
+const MainListItems = ({ drawerClose, collapsed }) => {
   const { whatsApps } = useContext(WhatsAppsContext);
   const { user } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
@@ -60,76 +63,87 @@ const MainListItems = (props) => {
             whats.status === "OPENING"
           );
         });
-        if (offlineWhats.length > 0) {
-          setConnectionWarning(true);
-        } else {
-          setConnectionWarning(false);
-        }
+        setConnectionWarning(offlineWhats.length > 0);
       }
     }, 2000);
     return () => clearTimeout(delayDebounceFn);
   }, [whatsApps]);
 
   return (
-    <div onClick={drawerClose}>
-      <ListItemLink
+    <nav className="flex flex-col gap-1 px-2" onClick={drawerClose}>
+      <NavItem
         to="/"
-        primary="Dashboard"
-        icon={<DashboardOutlinedIcon />}
+        icon={LayoutDashboard}
+        label="Dashboard"
+        collapsed={collapsed}
       />
-      <ListItemLink
+      <NavItem
         to="/connections"
-        primary={i18n.t("mainDrawer.listItems.connections")}
-        icon={
-          <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
-            <SyncAltIcon />
-          </Badge>
-        }
+        icon={Repeat}
+        label={i18n.t("mainDrawer.listItems.connections")}
+        badge={connectionWarning}
+        collapsed={collapsed}
       />
-      <ListItemLink
+      <NavItem
         to="/tickets"
-        primary={i18n.t("mainDrawer.listItems.tickets")}
-        icon={<WhatsAppIcon />}
+        icon={MessageCircle}
+        label={i18n.t("mainDrawer.listItems.tickets")}
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/contacts"
+        icon={Contact}
+        label={i18n.t("mainDrawer.listItems.contacts")}
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/quickAnswers"
+        icon={MessagesSquare}
+        label={i18n.t("mainDrawer.listItems.quickAnswers")}
+        collapsed={collapsed}
       />
 
-      <ListItemLink
-        to="/contacts"
-        primary={i18n.t("mainDrawer.listItems.contacts")}
-        icon={<ContactPhoneOutlinedIcon />}
-      />
-      <ListItemLink
-        to="/quickAnswers"
-        primary={i18n.t("mainDrawer.listItems.quickAnswers")}
-        icon={<QuestionAnswerOutlinedIcon />}
-      />
       <Can
         role={user.profile}
         perform="drawer-admin-items:view"
         yes={() => (
           <>
-            <Divider />
-            <ListSubheader inset>
-              {i18n.t("mainDrawer.listItems.administration")}
-            </ListSubheader>
-            <ListItemLink
+            <div className="mt-4 mb-1 px-3">
+              {!collapsed && (
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {i18n.t("mainDrawer.listItems.administration")}
+                </span>
+              )}
+              {collapsed && <div className="h-px bg-border" />}
+            </div>
+            <NavItem
               to="/users"
-              primary={i18n.t("mainDrawer.listItems.users")}
-              icon={<PeopleAltOutlinedIcon />}
+              icon={Users}
+              label={i18n.t("mainDrawer.listItems.users")}
+              collapsed={collapsed}
             />
-            <ListItemLink
-              to="/queues"
-              primary={i18n.t("mainDrawer.listItems.queues")}
-              icon={<AccountTreeOutlinedIcon />}
+            <NavItem
+              to="/Queues"
+              icon={Network}
+              label={i18n.t("mainDrawer.listItems.queues")}
+              collapsed={collapsed}
             />
-            <ListItemLink
-              to="/settings"
-              primary={i18n.t("mainDrawer.listItems.settings")}
-              icon={<SettingsOutlinedIcon />}
+            <NavItem
+              to="/tags"
+              icon={Tag}
+              label={i18n.t("mainDrawer.listItems.tags")}
+              collapsed={collapsed}
+            />
+            <NavItem
+              to="/Settings"
+              icon={Settings}
+              label={i18n.t("mainDrawer.listItems.settings")}
+              collapsed={collapsed}
             />
           </>
         )}
       />
-    </div>
+    </nav>
   );
 };
 

@@ -1,41 +1,28 @@
 import React from "react";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
-import Skeleton from "@mui/material/Skeleton";
+import { TableCell, TableRow } from "../ui/table";
+import { Skeleton } from "../ui/skeleton";
 
 const TableRowSkeleton = ({ avatar, columns }) => {
 	return (
-		<>
-			<TableRow>
-				{avatar && (
-					<>
-						<TableCell style={{ paddingRight: 0 }}>
-							<Skeleton
-								animation="wave"
-								variant="circular"
-								width={40}
-								height={40}
-							/>
-						</TableCell>
-						<TableCell>
-							<Skeleton animation="wave" height={30} width={80} />
-						</TableCell>
-					</>
-				)}
-				{Array.from({ length: columns }, (_, index) => (
-					<TableCell align="center" key={index}>
-						<div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-							<Skeleton
-								align="center"
-								animation="wave"
-								height={30}
-								width={80}
-							/>
-						</div>
+		<TableRow>
+			{avatar && (
+				<>
+					<TableCell>
+						<Skeleton className="h-10 w-10 rounded-full" />
 					</TableCell>
-				))}
-			</TableRow>
-		</>
+					<TableCell>
+						<Skeleton className="h-4 w-20" />
+					</TableCell>
+				</>
+			)}
+			{Array.from({ length: columns }, (_, index) => (
+				<TableCell key={index} className="text-center">
+					<div className="flex items-center justify-center">
+						<Skeleton className="h-4 w-20" />
+					</div>
+				</TableCell>
+			))}
+		</TableRow>
 	);
 };
 

@@ -1,15 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import CssBaseline from "@mui/material/CssBaseline";
+import "./globals.css";
 
 import App from "./App";
 
-ReactDOM.render(
-	<CssBaseline>
-		<App />
-	</CssBaseline>,
-	document.getElementById("root")
-);
+ReactDOM.render(<App />, document.getElementById("root"));
 
 // ReactDOM.render(
 // 	<React.StrictMode>
