@@ -8,10 +8,13 @@ import {
   AutoIncrement,
   AllowNull,
   Unique,
-  BelongsToMany
+  BelongsToMany,
+  ForeignKey,
+  BelongsTo
 } from "sequelize-typescript";
 import Ticket from "./Ticket";
 import TicketTag from "./TicketTag";
+import Company from "./Company";
 
 @Table
 class Tag extends Model<Tag> {
@@ -21,7 +24,7 @@ class Tag extends Model<Tag> {
   id: number;
 
   @AllowNull(false)
-  @Unique
+  @Unique("tag_name_company")
   @Column
   name: string;
 
@@ -37,6 +40,14 @@ class Tag extends Model<Tag> {
 
   @BelongsToMany(() => Ticket, () => TicketTag)
   tickets: Array<Ticket & { TicketTag: TicketTag }>;
+
+  @ForeignKey(() => Company)
+  @Unique("tag_name_company")
+  @Column
+  companyId: number;
+
+  @BelongsTo(() => Company)
+  company: Company;
 }
 
 export default Tag;

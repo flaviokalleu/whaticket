@@ -20,6 +20,7 @@ import User from "./User";
 import Whatsapp from "./Whatsapp";
 import Tag from "./Tag";
 import TicketTag from "./TicketTag";
+import Company from "./Company";
 
 @Table
 class Ticket extends Model<Ticket> {
@@ -80,6 +81,13 @@ class Ticket extends Model<Ticket> {
 
   @BelongsToMany(() => Tag, () => TicketTag)
   tags: Array<Tag & { TicketTag: TicketTag }>;
+
+  @ForeignKey(() => Company)
+  @Column
+  companyId: number;
+
+  @BelongsTo(() => Company)
+  company: Company;
 }
 
 export default Ticket;

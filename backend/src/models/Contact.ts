@@ -9,10 +9,13 @@ import {
   AllowNull,
   Unique,
   Default,
-  HasMany
+  HasMany,
+  ForeignKey,
+  BelongsTo
 } from "sequelize-typescript";
 import ContactCustomField from "./ContactCustomField";
 import Ticket from "./Ticket";
+import Company from "./Company";
 
 @Table
 class Contact extends Model<Contact> {
@@ -24,11 +27,11 @@ class Contact extends Model<Contact> {
   @Column
   name: string;
 
-  @Unique
+  @Unique("contact_number_company")
   @Column
   number: string;
 
-  @Unique
+  @Unique("contact_lid_company")
   @Column
   lid: string;
 
@@ -55,6 +58,15 @@ class Contact extends Model<Contact> {
 
   @HasMany(() => ContactCustomField)
   extraInfo: ContactCustomField[];
+
+  @ForeignKey(() => Company)
+  @Unique("contact_number_company")
+  @Unique("contact_lid_company")
+  @Column
+  companyId: number;
+
+  @BelongsTo(() => Company)
+  company: Company;
 }
 
 export default Contact;

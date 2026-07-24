@@ -34,6 +34,12 @@ const isAuthApi = async (
     if (!safeCompare(getToken.value, token)) {
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
+
+    req.user = {
+      id: "",
+      profile: "api",
+      companyId: getToken.companyId
+    };
   } catch (err) {
     logger.warn(err, "isAuthApi: token verification failed");
     throw new AppError(

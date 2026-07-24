@@ -9,6 +9,7 @@ interface TokenPayload {
   id: string;
   username: string;
   profile: string;
+  companyId: number;
   iat: number;
   exp: number;
 }
@@ -24,11 +25,12 @@ const isAuth = (req: Request, res: Response, next: NextFunction): void => {
 
   try {
     const decoded = verify(token, authConfig.secret);
-    const { id, profile } = decoded as TokenPayload;
+    const { id, profile, companyId } = decoded as TokenPayload;
 
     req.user = {
       id,
-      profile
+      profile,
+      companyId
     };
   } catch (err) {
     logger.warn(err, "isAuth: token verification failed");
