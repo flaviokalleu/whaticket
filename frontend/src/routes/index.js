@@ -27,6 +27,7 @@ import Boards from "../pages/Boards";
 import InternalChat from "../pages/InternalChat";
 import Flows from "../pages/Flows";
 import FlowBuilder from "../pages/FlowBuilder";
+import Reports from "../pages/Reports";
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import { ThemeProvider } from "../context/DarkMode";
@@ -64,6 +65,7 @@ const Routes = () => {
                 <Route exact path="/internal-chat" component={InternalChat} isPrivate />
                 <Route exact path="/flows" component={Flows} isPrivate />
                 <Route exact path="/flows/:flowId/edit" component={FlowBuilder} isPrivate />
+                <Route exact path="/reports" component={Reports} isPrivate />
               </LoggedInLayout>
             </WhatsAppsProvider>
           </Switch>

@@ -22,6 +22,7 @@ import {
   KanbanSquare,
   MessageSquareText,
   Workflow,
+  BarChart3,
   ChevronDown,
 } from "lucide-react";
 
@@ -139,6 +140,12 @@ const MainListItems = ({ drawerClose, collapsed }) => {
         to="/"
         icon={LayoutDashboard}
         label="Dashboard"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/reports"
+        icon={BarChart3}
+        label="Relatórios"
         collapsed={collapsed}
       />
       <NavItem
