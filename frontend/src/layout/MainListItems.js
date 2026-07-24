@@ -10,6 +10,17 @@ import {
   Users,
   Settings,
   Tag,
+  Megaphone,
+  UserPlus,
+  Filter,
+  CalendarClock,
+  Image,
+  Users2,
+  Building2,
+  Webhook,
+  FileText,
+  KanbanSquare,
+  MessageSquareText,
 } from "lucide-react";
 
 import { cn } from "../lib/utils";
@@ -102,6 +113,54 @@ const MainListItems = ({ drawerClose, collapsed }) => {
         label={i18n.t("mainDrawer.listItems.quickAnswers")}
         collapsed={collapsed}
       />
+      <NavItem
+        to="/campaigns"
+        icon={Megaphone}
+        label="Campanhas"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/crm/leads"
+        icon={UserPlus}
+        label="Leads"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/crm/funnel"
+        icon={Filter}
+        label="Funil de vendas"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/scheduled-messages"
+        icon={CalendarClock}
+        label="Mensagens agendadas"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/media-library"
+        icon={Image}
+        label="Biblioteca de mídias"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/message-templates"
+        icon={FileText}
+        label="Modelos de mensagem"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/boards"
+        icon={KanbanSquare}
+        label="Quadros"
+        collapsed={collapsed}
+      />
+      <NavItem
+        to="/internal-chat"
+        icon={MessageSquareText}
+        label="Chat interno"
+        collapsed={collapsed}
+      />
 
       <Can
         role={user.profile}
@@ -132,6 +191,24 @@ const MainListItems = ({ drawerClose, collapsed }) => {
               to="/tags"
               icon={Tag}
               label={i18n.t("mainDrawer.listItems.tags")}
+              collapsed={collapsed}
+            />
+            <NavItem
+              to="/teams"
+              icon={Users2}
+              label="Equipes"
+              collapsed={collapsed}
+            />
+            <NavItem
+              to="/departments"
+              icon={Building2}
+              label="Departamentos"
+              collapsed={collapsed}
+            />
+            <NavItem
+              to="/webhooks"
+              icon={Webhook}
+              label="Webhooks"
               collapsed={collapsed}
             />
             <NavItem

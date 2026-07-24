@@ -1,187 +1,161 @@
 import React, { useState } from "react";
 
 import * as Yup from "yup";
-import { useHistory } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
+import { useHistory, Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
+import { MessageSquare, Eye, EyeOff, UserPlus, Loader2 } from "lucide-react";
 
-import {
-	Avatar,
-	Button,
-	CssBaseline,
-	TextField,
-	Grid,
-	Box,
-	Typography,
-	Container,
-	InputAdornment,
-	IconButton,
-	Link
-} from '@mui/material';
-
-import LockOutlined from '@mui/icons-material/LockOutlined';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 
 import { i18n } from "../../translate/i18n";
-
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
-// const Copyright = () => {
-// 	return (
-// 		<Typography variant="body2" color="textSecondary" align="center">
-// 			{"Copyleft "}
-// 			<Link color="inherit" href="https://github.com/canove">
-// 				Canove
-// 			</Link>{" "}
-// 			{new Date().getFullYear()}
-// 			{"."}
-// 		</Typography>
-// 	);
-// };
-
 const UserSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2, "Too Short!")
-		.max(50, "Too Long!")
-		.required("Required"),
-	password: Yup.string().min(5, "Too Short!").max(50, "Too Long!"),
-	email: Yup.string().email("Invalid email").required("Required"),
+  name: Yup.string()
+    .min(2, "Muito curto!")
+    .max(50, "Muito longo!")
+    .required("Obrigatório"),
+  password: Yup.string().min(5, "Muito curta!").max(50, "Muito longa!"),
+  email: Yup.string().email("E-mail inválido").required("Obrigatório"),
 });
 
 const SignUp = () => {
-	const history = useHistory();
+  const history = useHistory();
 
-	const initialState = { name: "", email: "", password: "" };
-	const [showPassword, setShowPassword] = useState(false);
-	const [user] = useState(initialState);
+  const initialState = { name: "", email: "", password: "" };
+  const [showPassword, setShowPassword] = useState(false);
+  const [user] = useState(initialState);
 
-	const handleSignUp = async values => {
-		try {
-			await api.post("/auth/signup", values);
-			toast.success(i18n.t("signup.toasts.success"));
-			history.push("/login");
-		} catch (err) {
-			toastError(err);
-		}
-	};
+  const handleSignUp = async (values) => {
+    try {
+      await api.post("/auth/signup", values);
+      toast.success(i18n.t("signup.toasts.success"));
+      history.push("/login");
+    } catch (err) {
+      toastError(err);
+    }
+  };
 
-	return (
-		<Container component="main" maxWidth="xs">
-			<CssBaseline />
-			<Box
-				sx={{
-					marginTop: 8,
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-				}}
-			>
-				<Avatar sx={{ margin: 1, bgcolor: "secondary.main" }}>
-					<LockOutlined />
-				</Avatar>
-				<Typography component="h1" variant="h5">
-					{i18n.t("signup.title")}
-				</Typography>
-				<Formik
-					initialValues={user}
-					enableReinitialize={true}
-					validationSchema={UserSchema}
-					onSubmit={(values, actions) => {
-						setTimeout(() => {
-							handleSignUp(values);
-							actions.setSubmitting(false);
-						}, 400);
-					}}
-				>
-					{({ touched, errors, isSubmitting }) => (
-						<Form style={{ width: "100%", marginTop: 24 }}>
-							<Grid container spacing={2}>
-								<Grid item xs={12}>
-									<Field
-										as={TextField}
-										autoComplete="name"
-										name="name"
-										error={touched.name && Boolean(errors.name)}
-										helperText={touched.name && errors.name}
-										variant="outlined"
-										fullWidth
-										id="name"
-										label={i18n.t("signup.form.name")}
-										autoFocus
-									/>
-								</Grid>
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 flex flex-col items-center gap-3 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
+            <MessageSquare className="h-7 w-7" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Criar conta</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Cadastre-se para começar a atender
+            </p>
+          </div>
+        </div>
 
-								<Grid item xs={12}>
-									<Field
-										as={TextField}
-										variant="outlined"
-										fullWidth
-										id="email"
-										label={i18n.t("signup.form.email")}
-										name="email"
-										error={touched.email && Boolean(errors.email)}
-										helperText={touched.email && errors.email}
-										autoComplete="email"
-									/>
-								</Grid>
-								<Grid item xs={12}>
-									<Field
-										as={TextField}
-										variant="outlined"
-										fullWidth
-										name="password"
-										id="password"
-										autoComplete="current-password"
-										error={touched.password && Boolean(errors.password)}
-										helperText={touched.password && errors.password}
-										label={i18n.t("signup.form.password")}
-										type={showPassword ? 'text' : 'password'}
-										InputProps={{
-											endAdornment: (
-												<InputAdornment position="end">
-													<IconButton
-														aria-label="toggle password visibility"
-														onClick={() => setShowPassword((e) => !e)}
-													>
-														{showPassword ? <VisibilityOff /> : <Visibility />}
-													</IconButton>
-												</InputAdornment>
-											)
-										}}
-									/>
-								</Grid>
-							</Grid>
-							<Button
-								type="submit"
-								fullWidth
-								variant="contained"
-								color="primary"
-								sx={{ margin: "24px 0 16px" }}
-							>
-								{i18n.t("signup.buttons.submit")}
-							</Button>
-							<Grid container justifyContent="flex-end">
-								<Grid item>
-									<Link
-										href="#"
-										variant="body2"
-										component={RouterLink}
-										to="/login"
-									>
-										{i18n.t("signup.buttons.login")}
-									</Link>
-								</Grid>
-							</Grid>
-						</Form>
-					)}
-				</Formik>
-			</Box>
-			<Box mt={5}>{/* <Copyright /> */}</Box>
-		</Container>
-	);
+        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <Formik
+            initialValues={user}
+            enableReinitialize={true}
+            validationSchema={UserSchema}
+            onSubmit={(values, actions) => {
+              setTimeout(() => {
+                handleSignUp(values);
+                actions.setSubmitting(false);
+              }, 400);
+            }}
+          >
+            {({ touched, errors, isSubmitting }) => (
+              <Form className="space-y-4" noValidate>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name">{i18n.t("signup.form.name")}</Label>
+                  <Field
+                    as={Input}
+                    id="name"
+                    name="name"
+                    autoComplete="name"
+                    autoFocus
+                    placeholder="Seu nome"
+                  />
+                  {touched.name && errors.name && (
+                    <p className="text-xs text-destructive">{errors.name}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">{i18n.t("signup.form.email")}</Label>
+                  <Field
+                    as={Input}
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="seu@email.com"
+                  />
+                  {touched.email && errors.email && (
+                    <p className="text-xs text-destructive">{errors.email}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="password">
+                    {i18n.t("signup.form.password")}
+                  </Label>
+                  <div className="relative">
+                    <Field
+                      as={Input}
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder="••••••••"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  {touched.password && errors.password && (
+                    <p className="text-xs text-destructive">{errors.password}</p>
+                  )}
+                </div>
+
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="h-4 w-4" />
+                  )}
+                  {i18n.t("signup.buttons.submit")}
+                </Button>
+              </Form>
+            )}
+          </Formik>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Já tem uma conta?{" "}
+          <RouterLink
+            to="/login"
+            className="font-medium text-primary hover:underline"
+          >
+            Entrar
+          </RouterLink>
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default SignUp;
