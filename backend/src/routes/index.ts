@@ -38,6 +38,7 @@ import dealRoutes from "./dealRoutes";
 import leadRoutes from "./leadRoutes";
 import flowRoutes from "./flowRoutes";
 import flowWebhookRoutes from "./flowWebhookRoutes";
+import reportRoutes from "./reportRoutes";
 
 const routes = Router();
 
@@ -78,6 +79,7 @@ routes.use(dealRoutes);
 routes.use(leadRoutes);
 routes.use(flowRoutes);
 routes.use(flowWebhookRoutes);
+routes.use(reportRoutes);
 routes.use("/api/messages", apiRoutes);
 
 export default routes;

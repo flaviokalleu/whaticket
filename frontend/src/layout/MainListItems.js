@@ -21,6 +21,7 @@ import {
   FileText,
   KanbanSquare,
   MessageSquareText,
+  Workflow,
   ChevronDown,
 } from "lucide-react";
 
@@ -206,6 +207,16 @@ const MainListItems = ({ drawerClose, collapsed }) => {
           to="/campaigns"
           icon={Megaphone}
           label="Campanhas"
+          collapsed={collapsed}
+        />
+      </NavSection>
+
+      {/* Automação */}
+      <NavSection id="automacao" label="Automação" collapsed={collapsed}>
+        <NavItem
+          to="/flows"
+          icon={Workflow}
+          label="Fluxos"
           collapsed={collapsed}
         />
       </NavSection>
