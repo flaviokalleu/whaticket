@@ -21,6 +21,7 @@ import {
   FileText,
   KanbanSquare,
   MessageSquareText,
+  ChevronDown,
 } from "lucide-react";
 
 import { cn } from "../lib/utils";
@@ -38,9 +39,7 @@ function NavItem({ to, icon: Icon, label, badge, onClick, collapsed }) {
         cn(
           "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
           "hover:bg-accent hover:text-accent-foreground",
-          isActive
-            ? "bg-primary/10 text-primary"
-            : "text-muted-foreground"
+          isActive ? "bg-primary/10 text-primary" : "text-muted-foreground"
         )
       }
     >
@@ -54,6 +53,58 @@ function NavItem({ to, icon: Icon, label, badge, onClick, collapsed }) {
       </span>
       {!collapsed && <span className="truncate">{label}</span>}
     </NavLink>
+  );
+}
+
+function NavSection({ id, label, collapsed, children }) {
+  const storageKey = `navSection:${id}`;
+  const [open, setOpen] = useState(() => {
+    const stored = localStorage.getItem(storageKey);
+    return stored === null ? true : stored === "true";
+  });
+
+  const toggle = (e) => {
+    // não deixa o clique do cabeçalho fechar o drawer mobile
+    e.stopPropagation();
+    setOpen((prev) => {
+      localStorage.setItem(storageKey, String(!prev));
+      return !prev;
+    });
+  };
+
+  if (collapsed) {
+    return (
+      <>
+        <div className="my-2 h-px bg-border" />
+        {children}
+      </>
+    );
+  }
+
+  return (
+    <div className="mt-4">
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex w-full items-center justify-between rounded-md px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 transition-colors hover:text-foreground"
+      >
+        <span>{label}</span>
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 transition-transform duration-200",
+            !open && "-rotate-90"
+          )}
+        />
+      </button>
+      <div
+        className={cn(
+          "mt-1 flex flex-col gap-1 overflow-hidden transition-all",
+          !open && "hidden"
+        )}
+      >
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -81,7 +132,8 @@ const MainListItems = ({ drawerClose, collapsed }) => {
   }, [whatsApps]);
 
   return (
-    <nav className="flex flex-col gap-1 px-2" onClick={drawerClose}>
+    <nav className="flex flex-col gap-1 px-2 pb-6" onClick={drawerClose}>
+      {/* Nível principal */}
       <NavItem
         to="/"
         icon={LayoutDashboard}
@@ -95,102 +147,99 @@ const MainListItems = ({ drawerClose, collapsed }) => {
         badge={connectionWarning}
         collapsed={collapsed}
       />
-      <NavItem
-        to="/tickets"
-        icon={MessageCircle}
-        label={i18n.t("mainDrawer.listItems.tickets")}
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/contacts"
-        icon={Contact}
-        label={i18n.t("mainDrawer.listItems.contacts")}
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/quickAnswers"
-        icon={MessagesSquare}
-        label={i18n.t("mainDrawer.listItems.quickAnswers")}
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/campaigns"
-        icon={Megaphone}
-        label="Campanhas"
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/crm/leads"
-        icon={UserPlus}
-        label="Leads"
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/crm/funnel"
-        icon={Filter}
-        label="Funil de vendas"
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/scheduled-messages"
-        icon={CalendarClock}
-        label="Mensagens agendadas"
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/media-library"
-        icon={Image}
-        label="Biblioteca de mídias"
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/message-templates"
-        icon={FileText}
-        label="Modelos de mensagem"
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/boards"
-        icon={KanbanSquare}
-        label="Quadros"
-        collapsed={collapsed}
-      />
-      <NavItem
-        to="/internal-chat"
-        icon={MessageSquareText}
-        label="Chat interno"
-        collapsed={collapsed}
-      />
 
+      {/* Atendimento */}
+      <NavSection id="atendimento" label="Atendimento" collapsed={collapsed}>
+        <NavItem
+          to="/tickets"
+          icon={MessageCircle}
+          label={i18n.t("mainDrawer.listItems.tickets")}
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/contacts"
+          icon={Contact}
+          label={i18n.t("mainDrawer.listItems.contacts")}
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/quickAnswers"
+          icon={MessagesSquare}
+          label={i18n.t("mainDrawer.listItems.quickAnswers")}
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/message-templates"
+          icon={FileText}
+          label="Modelos de mensagem"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/scheduled-messages"
+          icon={CalendarClock}
+          label="Mensagens agendadas"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/media-library"
+          icon={Image}
+          label="Biblioteca de mídias"
+          collapsed={collapsed}
+        />
+      </NavSection>
+
+      {/* CRM & Vendas */}
+      <NavSection id="crm" label="CRM & Vendas" collapsed={collapsed}>
+        <NavItem
+          to="/crm/leads"
+          icon={UserPlus}
+          label="Leads"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/crm/funnel"
+          icon={Filter}
+          label="Funil de vendas"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/campaigns"
+          icon={Megaphone}
+          label="Campanhas"
+          collapsed={collapsed}
+        />
+      </NavSection>
+
+      {/* Equipe / colaboração interna */}
+      <NavSection id="equipe" label="Colaboração" collapsed={collapsed}>
+        <NavItem
+          to="/boards"
+          icon={KanbanSquare}
+          label="Quadros"
+          collapsed={collapsed}
+        />
+        <NavItem
+          to="/internal-chat"
+          icon={MessageSquareText}
+          label="Chat interno"
+          collapsed={collapsed}
+        />
+      </NavSection>
+
+      {/* Administração (somente admin) */}
       <Can
         role={user.profile}
         perform="drawer-admin-items:view"
         yes={() => (
-          <>
-            <div className="mt-4 mb-1 px-3">
-              {!collapsed && (
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {i18n.t("mainDrawer.listItems.administration")}
-                </span>
-              )}
-              {collapsed && <div className="h-px bg-border" />}
-            </div>
+          <NavSection
+            id="administracao"
+            label={i18n.t("mainDrawer.listItems.administration")}
+            collapsed={collapsed}
+          >
             <NavItem
               to="/users"
               icon={Users}
               label={i18n.t("mainDrawer.listItems.users")}
-              collapsed={collapsed}
-            />
-            <NavItem
-              to="/Queues"
-              icon={Network}
-              label={i18n.t("mainDrawer.listItems.queues")}
-              collapsed={collapsed}
-            />
-            <NavItem
-              to="/tags"
-              icon={Tag}
-              label={i18n.t("mainDrawer.listItems.tags")}
               collapsed={collapsed}
             />
             <NavItem
@@ -206,6 +255,18 @@ const MainListItems = ({ drawerClose, collapsed }) => {
               collapsed={collapsed}
             />
             <NavItem
+              to="/Queues"
+              icon={Network}
+              label={i18n.t("mainDrawer.listItems.queues")}
+              collapsed={collapsed}
+            />
+            <NavItem
+              to="/tags"
+              icon={Tag}
+              label={i18n.t("mainDrawer.listItems.tags")}
+              collapsed={collapsed}
+            />
+            <NavItem
               to="/webhooks"
               icon={Webhook}
               label="Webhooks"
@@ -217,7 +278,7 @@ const MainListItems = ({ drawerClose, collapsed }) => {
               label={i18n.t("mainDrawer.listItems.settings")}
               collapsed={collapsed}
             />
-          </>
+          </NavSection>
         )}
       />
     </nav>

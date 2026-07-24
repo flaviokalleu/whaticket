@@ -126,7 +126,7 @@ const ShowCampaign = async (
 ): Promise<Campaign> => {
   const campaign = await Campaign.findOne({
     where: { id: campaignId, companyId },
-    include: ["campaignContacts"]
+    include: ["campaignContacts", "whatsapp"]
   });
   return campaign as Campaign;
 };
