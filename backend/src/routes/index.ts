@@ -29,6 +29,13 @@ import pushRoutes from "./pushRoutes";
 import webhookRoutes from "./webhookRoutes";
 import whiteLabelRoutes from "./whiteLabelRoutes";
 import birthdayRoutes from "./birthdayRoutes";
+import campaignRoutes from "./campaignRoutes";
+import boardRoutes from "./boardRoutes";
+import ticketLaneRoutes from "./ticketLaneRoutes";
+import personalKanbanRoutes from "./personalKanbanRoutes";
+import pipelineRoutes from "./pipelineRoutes";
+import dealRoutes from "./dealRoutes";
+import leadRoutes from "./leadRoutes";
 
 const routes = Router();
 
@@ -60,6 +67,13 @@ routes.use(pushRoutes);
 routes.use(webhookRoutes);
 routes.use(whiteLabelRoutes);
 routes.use(birthdayRoutes);
+routes.use(campaignRoutes);
+routes.use(boardRoutes);
+routes.use(ticketLaneRoutes);
+routes.use(personalKanbanRoutes);
+routes.use(pipelineRoutes);
+routes.use(dealRoutes);
+routes.use(leadRoutes);
 routes.use("/api/messages", apiRoutes);
 
 export default routes;

@@ -8,16 +8,130 @@ import {
   WebhookJobData,
   GenericJobData
 } from "./types";
+import Campaign from "../models/Campaign";
+import CampaignContact from "../models/CampaignContact";
+import CampaignLog from "../models/CampaignLog";
+import Contact from "../models/Contact";
+import formatBody from "../helpers/Mustache";
+import { whatsappProvider } from "../providers/WhatsApp";
 
 // Each processor below is intentionally a small, named, standalone function
-// so a future PR implementing the real campaign/scheduled-message/webhook
-// logic can fill it in without needing to touch the worker wiring/structure.
+// so a future PR implementing the real scheduled-message/webhook logic can
+// fill it in without needing to touch the worker wiring/structure.
+
+const sleep = (ms: number) =>
+  new Promise<void>(resolve => {
+    setTimeout(resolve, ms);
+  });
 
 export const processCampaignJob = async (job: Job<CampaignJobData>) => {
   const { companyId, campaignId } = job.data;
-  logger.info(
-    `received job ${job.id} for queue campaign, companyId ${companyId}, campaignId ${campaignId}, no processor registered yet`
-  );
+
+  const campaign = await Campaign.findOne({
+    where: { id: campaignId, companyId }
+  });
+
+  if (!campaign) {
+    logger.warn(
+      `processCampaignJob: campaign ${campaignId} (company ${companyId}) not found, skipping`
+    );
+    return;
+  }
+
+  if (campaign.status !== "running") {
+    logger.info(
+      `processCampaignJob: campaign ${campaignId} is not running (status ${campaign.status}), skipping`
+    );
+    return;
+  }
+
+  const pendingContacts = await CampaignContact.findAll({
+    where: { campaignId, companyId, status: "pending" },
+    include: [{ model: Contact }]
+  });
+
+  const intervalMs = Math.max(campaign.intervalSeconds, 1) * 1000;
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const campaignContact of pendingContacts) {
+    // Re-fetch the campaign's current status before every send so a
+    // pause/cancel issued mid-run is honored without processing the
+    // remaining contacts.
+    // eslint-disable-next-line no-await-in-loop
+    const current = await Campaign.findOne({
+      where: { id: campaignId, companyId }
+    });
+
+    if (!current || current.status !== "running") {
+      logger.info(
+        `processCampaignJob: campaign ${campaignId} no longer running, stopping mid-run`
+      );
+      return;
+    }
+
+    const { contact } = campaignContact;
+
+    try {
+      if (!contact || !contact.number) {
+        throw new Error("Contact has no number");
+      }
+
+      const chatId = `${contact.number}@${contact.isGroup ? "g" : "c"}.us`;
+      // mediaUrl is stored as a plain URL (not an uploaded file), so it is
+      // appended to the text body rather than sent through sendMedia, which
+      // expects a local file path/buffer from a multipart upload.
+      const rawBody = campaign.mediaUrl
+        ? `${campaign.body}\n${campaign.mediaUrl}`
+        : campaign.body;
+      const body = formatBody(rawBody, contact);
+
+      // eslint-disable-next-line no-await-in-loop
+      await whatsappProvider.sendMessage(campaign.whatsappId, chatId, body, {
+        linkPreview: !!campaign.mediaUrl
+      });
+
+      // eslint-disable-next-line no-await-in-loop
+      await campaignContact.update({ status: "sent", sentAt: new Date() });
+    } catch (err) {
+      logger.error({
+        info: `processCampaignJob: failed to send campaign ${campaignId} message to contact ${campaignContact.contactId}`,
+        err
+      });
+
+      // eslint-disable-next-line no-await-in-loop
+      await campaignContact.update({
+        status: "failed",
+        errorMessage: err instanceof Error ? err.message : String(err)
+      });
+
+      // eslint-disable-next-line no-await-in-loop
+      await CampaignLog.create({
+        campaignId,
+        companyId,
+        event: "error",
+        message: `Failed to send to contact ${campaignContact.contactId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      } as CampaignLog);
+    }
+
+    // eslint-disable-next-line no-await-in-loop
+    await sleep(intervalMs);
+  }
+
+  const finalCampaign = await Campaign.findOne({
+    where: { id: campaignId, companyId }
+  });
+
+  if (finalCampaign && finalCampaign.status === "running") {
+    await finalCampaign.update({ status: "completed" });
+    await CampaignLog.create({
+      campaignId,
+      companyId,
+      event: "completed",
+      message: "Campaign finished sending to all pending contacts"
+    } as CampaignLog);
+  }
 };
 
 export const processScheduledMessageJob = async (

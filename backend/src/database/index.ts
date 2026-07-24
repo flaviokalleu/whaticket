@@ -33,6 +33,25 @@ import Webhook from "../models/Webhook";
 import WebhookLog from "../models/WebhookLog";
 import BirthdayLog from "../models/BirthdayLog";
 import BirthdaySetting from "../models/BirthdaySetting";
+import Campaign from "../models/Campaign";
+import CampaignContact from "../models/CampaignContact";
+import CampaignLog from "../models/CampaignLog";
+import Board from "../models/Board";
+import BoardLane from "../models/BoardLane";
+import BoardTask from "../models/BoardTask";
+import BoardTaskTag from "../models/BoardTaskTag";
+import BoardTaskChecklistItem from "../models/BoardTaskChecklistItem";
+import TicketLane from "../models/TicketLane";
+import PersonalKanbanLane from "../models/PersonalKanbanLane";
+import PersonalKanbanItem from "../models/PersonalKanbanItem";
+import Pipeline from "../models/Pipeline";
+import PipelineStage from "../models/PipelineStage";
+import Deal from "../models/Deal";
+import DealNote from "../models/DealNote";
+import LeadPipeline from "../models/LeadPipeline";
+import Lead from "../models/Lead";
+import LeadInteraction from "../models/LeadInteraction";
+import LeadTask from "../models/LeadTask";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -74,7 +93,26 @@ const models = [
   Webhook,
   WebhookLog,
   BirthdayLog,
-  BirthdaySetting
+  BirthdaySetting,
+  Campaign,
+  CampaignContact,
+  CampaignLog,
+  Board,
+  BoardLane,
+  BoardTask,
+  BoardTaskTag,
+  BoardTaskChecklistItem,
+  TicketLane,
+  PersonalKanbanLane,
+  PersonalKanbanItem,
+  Pipeline,
+  PipelineStage,
+  Deal,
+  DealNote,
+  LeadPipeline,
+  Lead,
+  LeadInteraction,
+  LeadTask
 ];
 
 sequelize.addModels(models);

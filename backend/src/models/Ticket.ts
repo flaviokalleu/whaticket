@@ -10,7 +10,8 @@ import {
   BelongsToMany,
   HasMany,
   AutoIncrement,
-  Default
+  Default,
+  DataType
 } from "sequelize-typescript";
 
 import Contact from "./Contact";
@@ -21,6 +22,7 @@ import Whatsapp from "./Whatsapp";
 import Tag from "./Tag";
 import TicketTag from "./TicketTag";
 import Company from "./Company";
+import TicketLane from "./TicketLane";
 
 @Table
 class Ticket extends Model<Ticket> {
@@ -88,6 +90,13 @@ class Ticket extends Model<Ticket> {
 
   @BelongsTo(() => Company)
   company: Company;
+
+  @ForeignKey(() => TicketLane)
+  @Column(DataType.INTEGER)
+  ticketLaneId: number | null;
+
+  @BelongsTo(() => TicketLane)
+  ticketLane: TicketLane;
 }
 
 export default Ticket;
