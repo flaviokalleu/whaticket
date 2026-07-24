@@ -75,6 +75,13 @@ class User extends Model<User> {
   @BelongsTo(() => Company)
   company: Company;
 
+  @Column
+  twoFactorSecret: string;
+
+  @Default(false)
+  @Column
+  twoFactorEnabled: boolean;
+
   @BeforeUpdate
   @BeforeCreate
   static hashPassword = async (instance: User): Promise<void> => {

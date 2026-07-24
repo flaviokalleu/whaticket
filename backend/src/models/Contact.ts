@@ -11,7 +11,8 @@ import {
   Default,
   HasMany,
   ForeignKey,
-  BelongsTo
+  BelongsTo,
+  DataType
 } from "sequelize-typescript";
 import ContactCustomField from "./ContactCustomField";
 import Ticket from "./Ticket";
@@ -46,6 +47,9 @@ class Contact extends Model<Contact> {
   @Default(false)
   @Column
   isGroup: boolean;
+
+  @Column(DataType.DATEONLY)
+  birthDate: string;
 
   @CreatedAt
   createdAt: Date;
