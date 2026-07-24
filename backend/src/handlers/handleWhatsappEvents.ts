@@ -19,6 +19,9 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import CreateContactService from "../services/ContactServices/CreateContactService";
 
+import EnqueueFlowExecutionService from "../services/FlowService/EnqueueFlowExecutionService";
+import Flow from "../models/Flow";
+
 import { whatsappProvider } from "../providers/WhatsApp/whatsappProvider";
 import { MessageType, MessageAck } from "../providers/WhatsApp/types";
 
@@ -141,6 +144,37 @@ const processVcardMessage = async (
     );
   } catch (error) {
     logger.error("Error processing vcard message:", error);
+  }
+};
+
+// Dispara o fluxo vinculado à conexão quando chega uma mensagem de cliente.
+// A execução é enfileirada (BullMQ), então não bloqueia o recebimento.
+const triggerConnectionFlow = async (
+  flowId: number,
+  companyId: number,
+  contactPayload: ContactPayload,
+  messageBody: string,
+  ticket: Ticket
+): Promise<void> => {
+  try {
+    const flow = await Flow.findOne({
+      where: { id: flowId, companyId, isActive: true }
+    });
+
+    if (!flow) return;
+
+    await EnqueueFlowExecutionService({
+      flow,
+      input: {
+        name: contactPayload.name,
+        number: contactPayload.number,
+        message: { body: messageBody },
+        ticketId: ticket.id,
+        contactId: ticket.contactId
+      }
+    });
+  } catch (err) {
+    logger.error({ info: "Error triggering connection flow", flowId, err });
   }
 };
 
@@ -292,6 +326,20 @@ export const handleMessage = async (
     await CreateMessageService({ messageData });
 
     await processVcardMessage(processedMessage);
+
+    if (
+      whatsapp.flowId &&
+      !processedMessage.fromMe &&
+      !contextPayload.groupContact
+    ) {
+      await triggerConnectionFlow(
+        whatsapp.flowId,
+        whatsapp.companyId,
+        contactPayload,
+        processedMessage.body,
+        ticket
+      );
+    }
 
     if (
       !ticket.queue &&

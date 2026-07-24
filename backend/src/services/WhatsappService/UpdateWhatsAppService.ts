@@ -14,6 +14,7 @@ interface WhatsappData {
   greetingMessage?: string;
   farewellMessage?: string;
   queueIds?: number[];
+  flowId?: number | null;
 }
 
 interface Request {
@@ -43,7 +44,8 @@ const UpdateWhatsAppService = async ({
     session,
     greetingMessage,
     farewellMessage,
-    queueIds = []
+    queueIds = [],
+    flowId
   } = whatsappData;
 
   try {
@@ -75,7 +77,10 @@ const UpdateWhatsAppService = async ({
     session,
     greetingMessage,
     farewellMessage,
-    isDefault
+    isDefault,
+    // `flowId` só é tocado quando enviado: undefined mantém o valor atual,
+    // null/"" desvincula o fluxo da conexão.
+    ...(flowId !== undefined && { flowId: flowId || null })
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
