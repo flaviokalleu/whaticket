@@ -52,6 +52,8 @@ import LeadPipeline from "../models/LeadPipeline";
 import Lead from "../models/Lead";
 import LeadInteraction from "../models/LeadInteraction";
 import LeadTask from "../models/LeadTask";
+import Flow from "../models/Flow";
+import FlowExecution from "../models/FlowExecution";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -112,7 +114,9 @@ const models = [
   LeadPipeline,
   Lead,
   LeadInteraction,
-  LeadTask
+  LeadTask,
+  Flow,
+  FlowExecution
 ];
 
 sequelize.addModels(models);

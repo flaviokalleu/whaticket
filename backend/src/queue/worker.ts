@@ -14,6 +14,7 @@ import CampaignLog from "../models/CampaignLog";
 import Contact from "../models/Contact";
 import formatBody from "../helpers/Mustache";
 import { whatsappProvider } from "../providers/WhatsApp";
+import ExecuteFlowService from "../services/FlowService/ExecuteFlowService";
 
 // Each processor below is intentionally a small, named, standalone function
 // so a future PR implementing the real scheduled-message/webhook logic can
@@ -151,7 +152,17 @@ export const processWebhookJob = async (job: Job<WebhookJobData>) => {
 };
 
 export const processGenericJob = async (job: Job<GenericJobData>) => {
-  const { companyId, type } = job.data;
+  const { companyId, type, payload } = job.data;
+
+  if (type === "flow-execute") {
+    const { flowId, executionId } = payload as {
+      flowId: number;
+      executionId: number;
+    };
+    await ExecuteFlowService(flowId, executionId, companyId);
+    return;
+  }
+
   logger.info(
     `received job ${job.id} for queue generic, companyId ${companyId}, type ${type}, no processor registered yet`
   );

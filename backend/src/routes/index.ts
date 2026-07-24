@@ -36,6 +36,8 @@ import personalKanbanRoutes from "./personalKanbanRoutes";
 import pipelineRoutes from "./pipelineRoutes";
 import dealRoutes from "./dealRoutes";
 import leadRoutes from "./leadRoutes";
+import flowRoutes from "./flowRoutes";
+import flowWebhookRoutes from "./flowWebhookRoutes";
 
 const routes = Router();
 
@@ -74,6 +76,8 @@ routes.use(personalKanbanRoutes);
 routes.use(pipelineRoutes);
 routes.use(dealRoutes);
 routes.use(leadRoutes);
+routes.use(flowRoutes);
+routes.use(flowWebhookRoutes);
 routes.use("/api/messages", apiRoutes);
 
 export default routes;
