@@ -44,6 +44,9 @@ const routes = Router();
 
 routes.use(userRoutes);
 routes.use("/auth", authRoutes);
+// Rotas específicas de /settings/* precisam ser registradas antes de
+// settingRoutes, cujo PUT /settings/:settingKey captura qualquer sufixo.
+routes.use(whiteLabelRoutes);
 routes.use(settingRoutes);
 routes.use(contactRoutes);
 routes.use(ticketRoutes);
@@ -68,7 +71,6 @@ routes.use(scheduledMessageRoutes);
 routes.use(messageTemplateRoutes);
 routes.use(pushRoutes);
 routes.use(webhookRoutes);
-routes.use(whiteLabelRoutes);
 routes.use(birthdayRoutes);
 routes.use(campaignRoutes);
 routes.use(boardRoutes);

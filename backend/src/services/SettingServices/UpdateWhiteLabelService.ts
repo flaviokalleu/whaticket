@@ -2,10 +2,10 @@ import Setting from "../../models/Setting";
 
 interface Request {
   companyId: number;
-  appName?: string;
-  primaryColor?: string;
-  logoUrl?: string;
-  backgroundUrl?: string;
+  appName?: string | null;
+  primaryColor?: string | null;
+  logoUrl?: string | null;
+  backgroundUrl?: string | null;
 }
 
 const WHITE_LABEL_KEYS = {
@@ -17,15 +17,19 @@ const WHITE_LABEL_KEYS = {
 
 const upsertSetting = async (
   key: string,
-  value: string,
+  value: string | null,
   companyId: number
 ): Promise<void> => {
+  // Settings.value is NOT NULL: "sem valor" (ex.: logo removida) é gravado
+  // como string vazia, que GetWhiteLabelService converte de volta para null.
+  const safeValue = value ?? "";
+
   const [setting] = await Setting.findOrCreate({
     where: { key, companyId },
-    defaults: { key, value, companyId }
+    defaults: { key, value: safeValue, companyId }
   });
 
-  await setting.update({ value });
+  await setting.update({ value: safeValue });
 };
 
 const UpdateWhiteLabelService = async ({
